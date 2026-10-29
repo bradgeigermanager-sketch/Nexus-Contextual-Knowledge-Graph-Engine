@@ -90,3 +90,12 @@ The reusable validator is implemented in `src/neural-artifact-validation.js` and
 The validator accepts optional `externalResolvers` for member domains not yet stored in the current repository, such as contexts, models, processes, or collections. An unresolved extension type produces a warning rather than silently being treated as a verified reference. Known core types that lack a resolver are errors.
 
 This is structural and referential validation. It does not establish whether a claim is true, whether a source is trustworthy, or whether a cluster is semantically appropriate. Those require separate review and evidence-aware procedures.
+
+
+## Corpus loader and integrated validation
+
+The loader is implemented in `src/neural-artifact-corpus.js` and exported as `loadNeuralArtifactCorpus(options)`. It reads the canonical graph, source records, claims, evidence links, artifacts, and artifact links as one corpus, then invokes the reusable validator. On success it returns normalized collections, a validation report, the selected file paths, warnings, and lookup indexes for graph nodes, graph edges, artifacts, artifact versions, sources, claims, and evidence links.
+
+The default input paths are declared in `DEFAULT_FILES`. Tests or embedding applications may override paths and provide `rootDir`; extension member types may be resolved through `externalResolvers`. The loader checks configured paths remain within the selected root, reports missing or malformed files, and can optionally throw a `NeuralArtifactCorpusError` whose `report` property preserves the structured diagnostics. By default it returns the report instead of throwing, allowing callers to decide whether to block display, offer recovery, or show partial diagnostics.
+
+The loader is not yet wired into the browser UI or import flow. The current indexes are in-memory JavaScript Maps for a loaded snapshot; they are not a persistent database, vector index, or trained neural network. Structural validity does not establish factual accuracy, source authority, semantic relevance, or the correctness of any inferred cluster. Callers should treat the corpus as untrusted input and keep errors, warnings, provenance, and synthetic-data labels visible.
