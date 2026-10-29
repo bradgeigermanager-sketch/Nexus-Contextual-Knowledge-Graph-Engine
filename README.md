@@ -37,3 +37,6 @@ Each language has its own file under `docs/i18n/`. English is the terminology-co
 
 The automated Node.js test suite also checks multilingual documentation completeness against `docs/documentation-manifest.json`.
 - `src/neural-artifact-validation.js`: reusable validator for higher-order artifact records and their graph/evidence references.
+
+- `src/neural-artifact-corpus.js`: loads the graph, reference/evidence stores, artifacts, and artifact links as one corpus; validates cross-references and returns lookup indexes.
+- `test/neural-artifact-corpus.test.js`: tests successful loading, missing files, structured failure reports, and path containment.
