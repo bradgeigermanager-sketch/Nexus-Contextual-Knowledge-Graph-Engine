@@ -42,3 +42,7 @@ Pemuat kini menggabungkan catatan graf, sumber, klaim, bukti, dan artefak tingka
 ## Pembaruan: penelusuran hubungan
 
 Kode kini memiliki penelusuran korpus berbatas yang dimulai dari referensi bertipe, seperti simpul, sisi, sumber, klaim, tautan bukti, atau artefak. Fitur ini mengembalikan rekaman yang dapat dijangkau beserta jalur yang mempertahankan jenis hubungan dan referensi bukti yang tersedia. Kedalaman dan jumlah hasil dibatasi. Ini adalah penelusuran graf deterministik, bukan inferensi jaringan saraf atau bukti kebenaran; fitur ini belum terhubung ke antarmuka browser.
+
+## Pembaruan lapisan kueri
+
+Modul kueri kini menerima referensi awal bertipe dan target opsional, serta filter untuk jenis rekaman, jenis artefak, status, domain konteks, dan jenis atau kategori hubungan. Hasilnya menyatakan apakah target tercapai, apakah jalur yang ditemukan memenuhi filter, dan apakah penelusuran terpotong oleh batas. Batasan penting: filter diterapkan setelah penelusuran berbatas, dan hanya jalur terpendek yang ditemukan untuk setiap rekaman yang tercapai yang dikembalikan. Fitur ini mendukung navigasi dan peninjauan, bukan pencatatan semua jalur, pemeringkatan semantik, atau pembuktian kebenaran. Modul ini belum terhubung ke antarmuka browser.
