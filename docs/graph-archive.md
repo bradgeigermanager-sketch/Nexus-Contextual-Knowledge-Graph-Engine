@@ -19,7 +19,7 @@ Keep a reproducible, version-controlled snapshot of the graph database in the re
 - Cypher: import and export.
 - SVG: export only; it is a visualization, not a graph-database interchange format in the current UI.
 
-The CSV importer currently uses naive comma splitting, so quoted fields containing commas, quotes, or newlines are not reliably supported. The Cypher importer uses regular expressions for a narrow subset of syntax and does not retain all properties such as edge weights. These are known implementation gaps, not reasons to claim full compatibility. The archive includes fixtures so the gaps can be tested and closed.
+The CSV importer/exporter now handles quoted commas, escaped quotes, and embedded line breaks, and exports node metrics and edge IDs. Regression tests cover these cases, though a successful CI run and full interactive browser test still need confirmation. The Cypher importer now resolves basic aliases in exported MATCH statements and preserves numeric relationship weights, but it remains a regex-based subset that does not support arbitrary Cypher syntax or every property. Full-fidelity round trips are not yet guaranteed.
 
 ## Required validation
 
