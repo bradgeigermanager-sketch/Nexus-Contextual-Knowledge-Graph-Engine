@@ -35,3 +35,7 @@ El cargador reúne ahora los registros del grafo, las fuentes, las afirmaciones,
 ## Actualización: recorrido de relaciones
 
 El código ahora incluye un recorrido limitado del corpus que comienza en una referencia tipada, como un nodo, una arista, una fuente, una afirmación, un enlace de evidencia o un artefacto. Devuelve los registros alcanzables y rutas que conservan los tipos de relación y las referencias de evidencia disponibles. La profundidad y la cantidad de resultados tienen límites. Es un recorrido determinista del grafo, no una inferencia de red neuronal ni una prueba de veracidad; todavía no está conectado a la interfaz del navegador.
+
+## Actualización de la capa de consultas
+
+El módulo de consultas ahora acepta una referencia inicial tipada y un destino opcional, además de filtros por tipo de registro, tipo de artefacto, estado, dominio de contexto y clase o tipo de relación. El resultado indica si se alcanzó el destino, si una ruta descubierta cumple los filtros y si el recorrido se truncó por los límites. Limitación importante: los filtros se aplican después del recorrido acotado y solo se devuelve la ruta más corta descubierta para cada registro alcanzado. Esto facilita la navegación y la revisión, pero no enumera todas las rutas posibles, no clasifica la relevancia semántica ni demuestra la verdad. El módulo aún no está conectado a la interfaz del navegador.
