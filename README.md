@@ -18,10 +18,18 @@ The graph archive and reference corpus currently use explicitly synthetic demons
 - [Graph archive and format policy](docs/graph-archive.md)
 - [Graph data contract](docs/graph-data-contract.md)
 - [Reference and evidence corpus](docs/reference-evidence-corpus.md)
+- [Neural Network Artifact Layer design, loader, validator, and traversal](docs/neural-artifact-layer.md)
 
-## Validation
+## Validation and query foundation
 
-The repository uses Node.js built-in tests and GitHub Actions to check graph structure, import/export helper behavior, archive fixtures, and reference-corpus relationships.
+The repository uses Node.js built-in tests and GitHub Actions to check graph structure, import/export helper behavior, archive fixtures, reference-corpus relationships, corpus loading, and bounded traversal.
+
+- `src/neural-artifact-validation.js`: reusable structural and cross-reference validator.
+- `src/neural-artifact-corpus.js`: loads the graph, references, evidence, artifacts, and artifact links into one validated snapshot with lookup indexes.
+- `src/neural-artifact-traversal.js`: bounded typed traversal from nodes, edges, sources, claims, evidence links, or artifacts; returns paths that preserve relationship and provenance metadata.
+- `test/neural-artifact-corpus.test.js` and `test/neural-artifact-traversal.test.js`: loader and traversal tests.
+
+Traversal is deterministic graph exploration, not a trained neural network, semantic search engine, or truth-ranking system. The browser UI is not yet wired to the loader or traversal API.
 
 ## Multilingual system documentation
 
@@ -32,11 +40,3 @@ The maintained documentation set provides a technical read-out and a plain-langu
 - [Language manifest](docs/documentation-manifest.json)
 
 Each language has its own file under `docs/i18n/`. English is the terminology-control version; translations should be updated together whenever implementation status or system concepts change. The documentation distinguishes current implementation from planned work and labels synthetic examples as demonstrations rather than real-world evidence.
-
-- [Neural Network Artifact Layer design](docs/neural-artifact-layer.md)
-
-The automated Node.js test suite also checks multilingual documentation completeness against `docs/documentation-manifest.json`.
-- `src/neural-artifact-validation.js`: reusable validator for higher-order artifact records and their graph/evidence references.
-
-- `src/neural-artifact-corpus.js`: loads the graph, reference/evidence stores, artifacts, and artifact links as one corpus; validates cross-references and returns lookup indexes.
-- `test/neural-artifact-corpus.test.js`: tests successful loading, missing files, structured failure reports, and path containment.
