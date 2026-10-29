@@ -42,3 +42,7 @@ Kipakiaji sasa hukusanya rekodi za grafu, vyanzo, madai, ushahidi na vizalia vya
 ## Sasisho: ufuatiliaji wa mahusiano
 
 Msimbo sasa una utaratibu wenye mipaka wa kufuatilia korpasi kuanzia rejeleo lenye aina maalumu, kama nodi, ukingo, chanzo, dai, kiungo cha ushahidi au artefakti. Hurejesha rekodi zinazoweza kufikiwa na njia zinazohifadhi aina za mahusiano na marejeleo ya ushahidi yanayopatikana. Kina na idadi ya matokeo vinawekewa mipaka. Huu ni ufuatiliaji wa grafu unaofuata kanuni, si hitimisho la mtandao wa neva wala uthibitisho wa ukweli; bado haujaunganishwa na kiolesura cha kivinjari.
+
+## Sasisho la safu ya hoja
+
+Moduli ya hoja sasa hupokea rejeleo la mwanzo lenye aina na lengo la hiari, pamoja na vichujio vya aina ya rekodi, aina ya artefakti, hali, kikoa cha muktadha, na aina au kategoria ya uhusiano. Matokeo huonyesha kama lengo limefikiwa, kama njia iliyopatikana inatimiza vichujio, na kama ufuatiliaji ulikatizwa na mipaka. Kizuizi muhimu: vichujio hutumika baada ya ufuatiliaji wenye mipaka, na njia fupi zaidi iliyopatikana pekee ndiyo hurudishwa kwa kila rekodi iliyofikiwa. Hii husaidia urambazaji na ukaguzi, si kuorodhesha njia zote, kupanga umuhimu wa kisemantiki, au kuthibitisha ukweli. Moduli bado haijaunganishwa na kiolesura cha kivinjari.
