@@ -42,3 +42,7 @@ Der Loader führt Graph-, Quellen-, Aussagen-, Beweis- und Artefaktdatensätze z
 ## Aktualisierung: Traversierung von Verbindungen
 
 Der Code enthält jetzt eine begrenzte Traversierungsfunktion, die bei einer typisierten Referenz beginnt, etwa einem Knoten, einer Kante, einer Quelle, einer Behauptung, einem Evidenzverweis oder einem Artefakt. Sie liefert erreichbare Datensätze und Pfade, die Beziehungstypen und vorhandene Evidenzverweise bewahren. Tiefe und Ergebniszahl sind begrenzt. Dies ist deterministische Graphtraversierung, keine neuronale Inferenz und kein Wahrheitsnachweis; die Funktion ist noch nicht mit der Browseroberfläche verbunden.
+
+## Aktualisierung der Abfrageebene
+
+Das Abfragemodul akzeptiert jetzt eine typisierte Startreferenz und optional ein Ziel sowie Filter für Datensatztyp, Artefakttyp, Status, Kontextdomäne und Beziehungsart bzw. Beziehungstyp. Das Ergebnis zeigt, ob das Ziel erreicht wurde, ob ein gefundener Pfad die Filter erfüllt und ob die Traversierung begrenzt wurde. Wichtige Einschränkung: Filter werden erst nach der begrenzten Traversierung angewendet; pro erreichtem Datensatz wird nur der kürzeste gefundene Pfad zurückgegeben. Die Funktion unterstützt Navigation und Prüfung, nicht die vollständige Auflistung aller Pfade, semantisches Ranking oder einen Wahrheitsbeweis. Das Modul ist noch nicht mit der Browseroberfläche verbunden.
