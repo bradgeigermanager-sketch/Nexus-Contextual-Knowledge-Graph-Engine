@@ -43,7 +43,7 @@
         "test/submission-review.test.js",
         "docs/submission-review.md"
       ],
-      "notes": "Groups staging statuses and validates decision shape, candidate fingerprint, and supplied corpus snapshot ID; reviewer identity is not authenticated and decisions are not persisted."
+      "notes": "Groups staging statuses, exposes a local decision-draft form, and validates candidate fingerprint plus supplied corpus snapshot ID; reviewer identity is not authenticated and decisions are not persisted."
     },
     {
       "id": "pages-site",
