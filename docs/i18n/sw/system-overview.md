@@ -27,3 +27,9 @@ Kwa mfano, kizio kimoja cha vizalia kinaweza kuweka pamoja ripoti, mada, uhusian
 Mfumo bado unatengenezwa. Baadhi ya ukaguzi wa data, mifano, skima na majaribio ya kiotomatiki tayari yapo. Kihariri kamili cha kuona, ugunduzi wa makundi kiotomatiki na uchanganuzi wa mtandao halisi wa neva bado havijakamilika. Mifano iliyoandikwa kuwa ya kubuni ni ya maonyesho tu, si uthibitisho wa ukweli wa dunia halisi.
 
 Kwa kila taarifa, tenga maswali matatu: rekodi inasema nini, ni chanzo gani kinachoiunga mkono, na tuna uhakika kiasi gani kuhusu tafsiri yake? Tofauti za maoni na kutokuwa na uhakika vinapaswa kuonekana.
+
+## Hatua mpya ya kupakia mkusanyiko wa data
+
+Kipakiaji husoma grafu, vyanzo, madai, viungo vya ushahidi, vizalia na viungo kati ya vizalia kwa pamoja, kisha hukagua marejeo na kuunda faharasa za kutafuta. Faili zinazokosekana na marejeo yaliyovunjika huripotiwa badala ya kukubaliwa kimyakimya. Hii ni kazi ya kupakia data na kukagua ulinganifu wake, si mtandao wa neva unaojifunza au kuthibitisha ukweli.
+
+Kwa lugha rahisi, mfumo sasa una njia inayoweza kutumiwa tena kukusanya rekodi zilizounganishwa na kuangalia kama viungo vyake vinaelekeza kwenye rekodi zilizopo kabla sehemu nyingine ya programu haijazitumia. Kipakiaji bado hakijaunganishwa na kiolesura cha kivinjari.
