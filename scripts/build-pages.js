@@ -11,7 +11,8 @@ const modules = [
   "src/neural-artifact-query.js",
   "src/submission-contracts.js",
   "src/submission-import.js",
-  "src/submission-staging.js"
+  "src/submission-staging.js",
+  "src/submission-review.js"
 ];
 
 function copy(source, destination) {
@@ -52,7 +53,9 @@ function buildBrowserBundle() {
     normalizeSubmission: load("./submission-contracts").normalizeSubmission,
     validateQueryEnvelope: load("./submission-contracts").validateQueryEnvelope,
     parseSubmissionText: load("./submission-import").parseSubmissionText,
-    stageSubmissionText: load("./submission-staging").stageSubmissionText
+    stageSubmissionText: load("./submission-staging").stageSubmissionText,
+    summarizeStagingForReview: load("./submission-review").summarizeStagingForReview,
+    validateReviewDecision: load("./submission-review").validateReviewDecision
   });
 })(typeof window !== "undefined" ? window : globalThis);
 `;
