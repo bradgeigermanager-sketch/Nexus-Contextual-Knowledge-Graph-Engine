@@ -1,0 +1,20 @@
+{
+  "schema": "nexus-neural-artifact-manifest/v1",
+  "version": "0.1.0",
+  "status": "schema-prototype",
+  "dataset": "illustrative-neural-artifact-layer",
+  "synthetic": true,
+  "files": {
+    "artifacts": "artifacts.json",
+    "artifactLinks": "artifact-links.json"
+  },
+  "counts": {
+    "artifacts": 2,
+    "artifactLinks": 1
+  },
+  "relatedDatasets": [
+    "initial-application-seed-graph",
+    "illustrative-reference-evidence-corpus"
+  ],
+  "note": "Higher-order graph artifact fixtures; no trained neural network or live ML inference is implemented."
+}
