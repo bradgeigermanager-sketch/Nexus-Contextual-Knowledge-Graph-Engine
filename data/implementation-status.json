@@ -1,0 +1,22 @@
+{
+  "schema": "nexus-implementation-registry/v1",
+  "updatedAt": "2026-10-28",
+  "statusDefinitions": {
+    "implemented": "Present in repository and usable for the described scope; tests or runtime evidence should still be checked.",
+    "partial": "Implemented in a limited scope with documented constraints.",
+    "planned": "Not implemented yet.",
+    "unverified": "Configured or present, but the current runtime/deployment behavior has not been confirmed."
+  },
+  "features": [
+    {"id":"graph-archive","name":"Versioned graph archive","status":"implemented","evidence":["data/canonical/graph.json","schemas/graph.schema.json"],"notes":"Synthetic demonstration graph; not verified real-world facts."},
+    {"id":"corpus-loader","name":"Graph, source, claim, evidence, and artifact corpus loader","status":"implemented","evidence":["src/neural-artifact-corpus.js","src/neural-artifact-validation.js"],"notes":"Validation establishes structure and references, not factual truth."},
+    {"id":"bounded-traversal","name":"Bounded typed traversal and query API","status":"implemented","evidence":["src/neural-artifact-traversal.js","src/neural-artifact-query.js"],"notes":"Deterministic traversal, not semantic search or truth ranking."},
+    {"id":"submission-preview","name":"JSON/JSONL submission validation preview","status":"implemented","evidence":["src/submission-contracts.js","src/submission-import.js"],"notes":"Dry-run only; no persistence or authorization."},
+    {"id":"web-endpoints","name":"Curated outbound endpoint profiles and bounded client","status":"partial","evidence":["data/endpoints/registry.json","src/web-endpoint-client.js"],"notes":"Profiles are configured; live connectivity and production egress controls are not verified."},
+    {"id":"pages-site","name":"Static GitHub Pages landing and documentation site","status":"unverified","evidence":["site/index.html","site/docs.html",".github/workflows/pages.yml"],"notes":"Workflow is configured; public deployment must be verified after merge to main and Pages settings."},
+    {"id":"portal-ui","name":"Browser portal for graph search, relationships, source/evidence, submission preview, and endpoint registry","status":"partial","evidence":["site/portal.html"],"notes":"Read-only static client; search is lexical and graph relationships use the canonical graph only."},
+    {"id":"semantic-search","name":"Embedding-backed semantic search","status":"planned","evidence":[],"notes":"No embedding model or vector index is wired into this repository."},
+    {"id":"persistent-submissions","name":"Authorized persistent submission service","status":"planned","evidence":[],"notes":"Requires server-side authentication, authorization, conflict handling, audit log, and durable storage."},
+    {"id":"live-endpoint-health","name":"Scheduled live endpoint health checks","status":"planned","evidence":[],"notes":"Configured endpoint profiles do not imply current reachability."}
+  ]
+}
