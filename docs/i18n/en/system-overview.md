@@ -45,3 +45,7 @@ The loader now gathers graph, source, claim, evidence, and higher-order artifact
 ## Traversal and query foundation
 
 The new traversal module starts from a typed reference and follows recorded artifact membership, artifact links, and optionally graph-neighbor relationships. It returns reachable records and paths with relationship and provenance metadata. Depth and result count are bounded, and missing start references are reported. This is deterministic graph traversal—not neural inference, semantic ranking, or proof that a claim is true. It is not yet connected to the browser interface.
+
+## Typed query layer update
+
+A query module now accepts a typed starting reference and an optional target, with filters for record type, artifact type, status, context domain, and relationship kind/type. Results report whether the target was reached, whether a returned path passed the filters, and whether traversal was truncated. Important limitation: filters run after bounded traversal, and only one shortest discovered path per reached record is returned. This supports navigation and review, not complete route enumeration, semantic ranking, or proof of truth. The query module is not yet connected to the browser UI.
