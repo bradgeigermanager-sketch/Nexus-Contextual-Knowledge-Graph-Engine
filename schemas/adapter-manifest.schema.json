@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/adapter-manifest.schema.json",
+  "title": "Nexus query or submission adapter manifest",
+  "type": "object",
+  "required": ["adapterId", "version", "direction", "format", "capabilities", "trust"],
+  "properties": {
+    "adapterId": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+    "version": { "type": "string", "minLength": 1 },
+    "direction": { "enum": ["ingress", "egress", "bidirectional"] },
+    "format": { "type": "string", "minLength": 1 },
+    "capabilities": { "type": "array", "items": { "enum": ["query", "submit_node", "submit_edge", "submit_source", "submit_claim_evidence", "bulk_import", "export"] }, "uniqueItems": true },
+    "supportedVersions": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "lossiness": { "enum": ["lossless", "conditionally_lossless", "lossy", "unknown"] },
+    "trust": { "type": "object", "required": ["defaultTrust"], "properties": {
+      "defaultTrust": { "enum": ["untrusted", "reviewed", "trusted"] },
+      "requiresAuthentication": { "type": "boolean" },
+      "requiresHumanReview": { "type": "boolean" },
+      "mayExecuteCode": { "type": "boolean", "const": false }
+    }, "additionalProperties": false },
+    "limits": { "type": "object", "properties": {
+      "maxPayloadBytes": { "type": "integer", "minimum": 1 },
+      "maxRecords": { "type": "integer", "minimum": 1 },
+      "timeoutMs": { "type": "integer", "minimum": 1 }
+    }, "additionalProperties": false }
+  },
+  "additionalProperties": false
+}
