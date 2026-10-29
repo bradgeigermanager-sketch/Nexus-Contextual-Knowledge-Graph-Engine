@@ -32,3 +32,7 @@ The maintained documentation set provides a technical read-out and a plain-langu
 - [Language manifest](docs/documentation-manifest.json)
 
 Each language has its own file under `docs/i18n/`. English is the terminology-control version; translations should be updated together whenever implementation status or system concepts change. The documentation distinguishes current implementation from planned work and labels synthetic examples as demonstrations rather than real-world evidence.
+
+- [Neural Network Artifact Layer design](docs/neural-artifact-layer.md)
+
+The automated Node.js test suite also checks multilingual documentation completeness against `docs/documentation-manifest.json`.
