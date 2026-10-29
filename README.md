@@ -17,7 +17,7 @@ The graph archive and reference corpus currently use explicitly synthetic demons
 
 ## Public project site
 
-- [GitHub Pages implementation guide](docs/github-pages.md)
+- [GitHub Pages implementation guide](docs/github-pages.md)\n- [Nexus portal guide](docs/portal.md)
 - Static landing page source: `site/index.html`
 - Multilingual documentation reader: `site/docs.html`
 - Deployment workflow: `.github/workflows/pages.yml` (publishes only from `main`; branch and pull-request runs build the artifact without replacing the published site).
