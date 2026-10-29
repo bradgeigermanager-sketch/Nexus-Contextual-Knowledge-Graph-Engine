@@ -1,0 +1,81 @@
+{
+  "schema": "nexus-orchestration-constructs/v1",
+  "synthetic": true,
+  "constructs": [
+    {
+      "constructId": "construct-retrieval-answer-demo",
+      "versionId": "construct-retrieval-answer-demo@1",
+      "family": "workflow",
+      "constructType": "retrieval_augmented_answer",
+      "label": "Illustrative retrieval-and-answer pipeline",
+      "description": "Declarative synthetic example only; not executable.",
+      "status": "proposed",
+      "adapter": {
+        "framework": "langchain",
+        "package": "langchain",
+        "versionConstraint": "explicitly-pin-at-deployment",
+        "capability": "declarative-example",
+        "testedVersions": []
+      },
+      "inputContract": {
+        "type": "object",
+        "required": [
+          "question"
+        ],
+        "properties": {
+          "question": {
+            "type": "string"
+          }
+        }
+      },
+      "outputContract": {
+        "type": "object",
+        "required": [
+          "answer",
+          "source_refs"
+        ],
+        "properties": {
+          "answer": {
+            "type": "string"
+          },
+          "source_refs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "configuration": {
+        "retrieverRef": "construct-demo-retriever@1",
+        "promptRef": "construct-demo-prompt@1",
+        "modelRef": "construct-demo-model@1",
+        "parserRef": "construct-demo-parser@1",
+        "requireSourceReferences": true
+      },
+      "dependencies": [
+        "construct-demo-retriever@1",
+        "construct-demo-prompt@1",
+        "construct-demo-model@1",
+        "construct-demo-parser@1"
+      ],
+      "security": {
+        "executionEnabled": false,
+        "permissions": [],
+        "secretRefs": [],
+        "maxIterations": 1,
+        "timeoutMs": 30000,
+        "humanApproval": "required-before-enabling",
+        "sideEffects": []
+      },
+      "provenance": {
+        "createdBy": "repository-fixture",
+        "createdAt": "2026-10-28T00:00:00Z",
+        "synthetic": true,
+        "sourceRefs": []
+      },
+      "supersedes": []
+    }
+  ],
+  "note": "All records are synthetic and non-executable. No credentials or live endpoints are included."
+}
