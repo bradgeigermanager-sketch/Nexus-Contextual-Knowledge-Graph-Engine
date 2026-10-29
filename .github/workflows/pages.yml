@@ -27,7 +27,7 @@ jobs:
           cp site/docs.html _site/docs.html
           cp site/portal.html _site/portal.html
           cp index.html _site/explorer.html
-          cp -R docs _site/docs/
+          cp -R docs/. _site/docs/
           cp -R data _site/data/
           cp -R schemas _site/schemas/
           cp data/implementation-status.json _site/data/implementation-status.json
