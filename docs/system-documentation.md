@@ -37,3 +37,10 @@ This directory provides two complementary explanations of the system in each sup
 
 ## Scope note
 These documents describe the repository state known at the time of writing. The app is still evolving. User-facing reference and artifact editors, broad live-source ingestion, and trained neural-network inference are not described as implemented features.
+
+## Related technical references
+- [Neural Network Artifact Layer design](neural-artifact-layer.md)
+- [Reference and evidence corpus](reference-evidence-corpus.md)
+- [Graph data contract](graph-data-contract.md)
+
+The automated test suite checks the documentation manifest, required language set, document existence, paired audience sections, index links, and status vocabulary.
