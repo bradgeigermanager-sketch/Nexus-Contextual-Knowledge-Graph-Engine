@@ -7,7 +7,7 @@ The portal is a read-only browser UI for the current repository snapshot. It is 
 - **Graph search:** lexical matching against canonical graph nodes and edges.
 - **Relationship inspector:** uses the repository's bundled `queryNeuralArtifactCorpus` and bounded traversal implementation over the validated graph, references, evidence, and artifacts. It applies depth/result caps and reports query warnings. Results are structural navigation, not causal inference.
 - **Sources and evidence:** separate source, claim, and evidence-link records with raw metadata and verification stance.
-- **Submission preview:** uses the same `parseSubmissionText` importer and `normalizeSubmission` code as the Node.js project, bundled for the browser. JSON/JSONL parsing, byte/record limits, typed envelope checks, and duplicate idempotency-key detection share the repository implementation. It does not persist or authorize anything.
+- **Submission staging:** uses the shared JSON/JSONL importer, envelope normalizer, and staging module. It preserves provenance and idempotency keys, fingerprints candidate payloads for review, and classifies candidates as ready for review, duplicate/conflict with existing records, unresolved references, or duplicate/conflict within the batch. The FNV-1a 32-bit fingerprint is a non-cryptographic review aid, not a security or integrity guarantee. It does not authorize, persist, or commit anything.
 - **Endpoint directory:** shows configured endpoint profile properties and explicitly labels live connectivity as unverified.
 - **Implementation registry:** feature status, repository evidence paths, and limitations.
 
@@ -21,6 +21,6 @@ The Pages build runs the repository test suite, loads and validates the canonica
 - Search is lexical, not semantic or embedding-based.
 - The browser UI never invokes the outbound endpoint client.
 - Submission preview calls the shared repository importer/normalizer code, but valid preview records are still only candidates; there is no authorization, corpus conflict check, or persistence.
-- There is no database write, authentication, server-side authorization, commit, or audit-log service.
+- There is no database write, authentication, server-side authorization, commit, or audit-log service. Staging comparisons are a review aid; they are not a final merge/conflict resolution decision.
 - Endpoint enablement means selectable profile, not successful connectivity.
 - Implementation statuses are maintained metadata and are not a substitute for CI/deployment results.
