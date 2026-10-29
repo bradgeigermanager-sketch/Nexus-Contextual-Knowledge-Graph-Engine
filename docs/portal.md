@@ -7,7 +7,7 @@ The portal is a read-only browser UI for the current repository snapshot. It is 
 - **Graph search:** lexical matching against canonical graph nodes and edges.
 - **Relationship inspector:** uses the repository's bundled `queryNeuralArtifactCorpus` and bounded traversal implementation over the validated graph, references, evidence, and artifacts. It applies depth/result caps and reports query warnings. Results are structural navigation, not causal inference.
 - **Sources and evidence:** separate source, claim, and evidence-link records with raw metadata and verification stance.
-- **Submission staging:** uses the shared JSON/JSONL importer, envelope normalizer, and staging module. It preserves provenance and idempotency keys, fingerprints candidate payloads for review, and classifies candidates as ready for review, duplicate/conflict with existing records, unresolved references, or duplicate/conflict within the batch. The FNV-1a 32-bit fingerprint is a non-cryptographic review aid, not a security or integrity guarantee. It does not authorize, persist, or commit anything.
+- **Submission staging and review:** uses the shared JSON/JSONL importer, envelope normalizer, conflict-aware staging, and grouped review summaries. It preserves provenance and idempotency keys, fingerprints candidate payloads for review, and classifies candidates as ready for review, duplicate/conflict with existing records, unresolved references, or duplicate/conflict within the batch. The FNV-1a 32-bit fingerprint is a non-cryptographic review aid, not a security or integrity guarantee. The separate review helper validates proposed decisions against a candidate fingerprint and supplied corpus snapshot ID. It does not authenticate reviewers, authorize, persist, or commit anything.
 - **Endpoint directory:** shows configured endpoint profile properties and explicitly labels live connectivity as unverified.
 - **Implementation registry:** feature status, repository evidence paths, and limitations.
 
@@ -20,7 +20,7 @@ The Pages build runs the repository test suite, loads and validates the canonica
 - Current graph/source fixtures are synthetic demonstration data. Build fails if the corpus loader reports validation errors.
 - Search is lexical, not semantic or embedding-based.
 - The browser UI never invokes the outbound endpoint client.
-- Submission preview calls the shared repository importer/normalizer code, but valid preview records are still only candidates; there is no authorization, corpus conflict check, or persistence.
+- Submission preview calls the shared importer, normalizer, conflict-aware staging, and review-summary code. Valid preview records remain candidates; there is no reviewer authentication, authorization, durable decision record, or persistence.
 - There is no database write, authentication, server-side authorization, commit, or audit-log service. Staging comparisons are a review aid; they are not a final merge/conflict resolution decision.
 - Endpoint enablement means selectable profile, not successful connectivity.
 - Implementation statuses are maintained metadata and are not a substitute for CI/deployment results.
