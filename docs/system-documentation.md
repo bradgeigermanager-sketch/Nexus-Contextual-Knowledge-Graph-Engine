@@ -39,6 +39,7 @@ This directory provides two complementary explanations of the system in each sup
 These documents describe the repository state known at the time of writing. The app is still evolving. User-facing reference and artifact editors, broad live-source ingestion, and trained neural-network inference are not described as implemented features.
 
 ## Related technical references
+- [GitHub Pages implementation](github-pages.md)
 - [Neural Network Artifact Layer design](neural-artifact-layer.md)
 - [LangChain-style orchestration construct model](langchain-constructs.md)
 - [Query and submission interface contracts](query-submission-interface.md)
