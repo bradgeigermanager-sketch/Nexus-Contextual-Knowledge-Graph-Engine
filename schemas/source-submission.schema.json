@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/source-submission.schema.json",
+  "title": "Nexus source submission",
+  "type": "object",
+  "required": ["schema", "operation", "source"],
+  "properties": {
+    "schema": { "const": "nexus-source-submission/v1" },
+    "operation": { "enum": ["create_candidate", "upsert_candidate", "propose_supersession"] },
+    "source": { "type": "object", "required": ["sourceId", "sourceType", "title"], "properties": {
+      "sourceId": { "type": "string", "minLength": 1 },
+      "sourceType": { "type": "string", "minLength": 1 },
+      "uri": { "type": ["string", "null"], "format": "uri" },
+      "title": { "type": "string", "minLength": 1 },
+      "publisher": { "type": ["string", "null"] },
+      "publishedAt": { "type": ["string", "null"], "format": "date-time" },
+      "retrievedAt": { "type": ["string", "null"], "format": "date-time" },
+      "contentHash": { "type": ["string", "null"] },
+      "language": { "type": ["string", "null"] },
+      "provenance": { "type": "object" }
+    }, "additionalProperties": true }
+  },
+  "additionalProperties": false
+}
