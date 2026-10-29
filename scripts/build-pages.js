@@ -58,7 +58,7 @@ function buildBrowserBundle() {
 function main() {
   const corpus = loadNeuralArtifactCorpus({ rootDir: root });
   if (!corpus.valid) {
-    throw new Error("Canonical corpus validation failed; refusing to build Pages data:\\n" + corpus.errors.join("\\n"));
+    throw new Error("Canonical corpus validation failed; refusing to build Pages data:\n" + corpus.errors.join("\n"));
   }
   fs.rmSync(outDir, { recursive: true, force: true });
   fs.mkdirSync(outDir, { recursive: true });
@@ -74,7 +74,7 @@ function main() {
     valid: corpus.valid,
     validation: { errors: corpus.errors, warnings: corpus.warnings },
     data: corpus.data
-  }, null, 2) + "\\n");
+  }, null, 2) + "\n");
   fs.writeFileSync(path.join(outDir, "nexus-modules.js"), buildBrowserBundle());
   fs.writeFileSync(path.join(outDir, ".nojekyll"), "");
   for (const required of [
