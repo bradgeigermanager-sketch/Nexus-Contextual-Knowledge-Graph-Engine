@@ -10,10 +10,11 @@ An edge must be a JSON object with a unique, non-empty string `id`, `source` and
 
 ## Import and persistence requirements
 1. Parse input inside error handling.
-2. Validate the full candidate graph before replacing active state.
+2. Validate the full candidate graph before changing active state; support both merge and explicit replace modes.
 3. Reject duplicate IDs and edges with missing endpoints.
 4. Do not silently coerce invalid weights or values.
 5. Recover from malformed saved graph JSON by using known-good seed data and log a warning.
+6. Provide a merge mode for additive imports and a replace mode for full snapshots; validate the complete candidate before committing either operation.
 6. Do not persist a graph state that fails structural validation.
 7. Preserve original fields where the format supports them; document format-specific losses.
 
