@@ -27,3 +27,9 @@ Contohnya, satu artefak dapat mengelompokkan sebuah laporan, suatu topik, hubung
 Sistem ini masih dikembangkan. Beberapa pemeriksaan data, contoh, skema, dan pengujian otomatis sudah tersedia. Editor visual lengkap, penemuan kelompok otomatis, dan analisis dengan jaringan saraf sungguhan belum selesai. Contoh berlabel sintetis hanya untuk demonstrasi, bukan bukti fakta nyata.
 
 Untuk setiap informasi, pisahkan tiga pertanyaan: apa yang tertulis, sumber apa yang mendukungnya, dan seberapa yakin kita terhadap penafsirannya. Perbedaan pendapat dan ketidakpastian harus tetap terlihat.
+
+## Tahap baru untuk memuat kumpulan data
+
+Pemuat membaca graf, sumber, klaim, tautan bukti, artefak, dan tautan antarartefak secara bersamaan, lalu memeriksa referensinya dan membuat indeks pencarian. Berkas yang hilang dan referensi yang rusak dilaporkan, bukan diterima begitu saja. Ini adalah fitur pemuatan dan pemeriksaan konsistensi data, bukan jaringan saraf yang mempelajari atau membuktikan fakta.
+
+Secara sederhana, sistem kini memiliki cara yang dapat digunakan ulang untuk mengumpulkan catatan yang saling terhubung dan memeriksa apakah tautannya mengarah ke catatan yang benar-benar ada sebelum bagian aplikasi lain menggunakannya. Pemuat ini belum terhubung ke antarmuka browser.
