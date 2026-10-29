@@ -3,7 +3,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
-const { validateEndpointProfile, isPrivateOrLocalHost, requestEndpoint } = require("../src/web-endpoint-client");
+const { validateEndpointProfile, isPrivateOrLocalHost, requestEndpoint, appendPath } = require("../src/web-endpoint-client");
 const registry = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "data/endpoints/registry.json"), "utf8"));
 test("endpoint registry profiles use secure, explicit host and method policies", () => {
   assert.equal(registry.schema, "nexus-web-endpoint-registry/v1");
@@ -34,4 +34,10 @@ test("endpoint requests reject disabled profiles, disallowed methods, and path e
   base.enabled = true;
   assert.equal((await requestEndpoint(base, { method: "DELETE" })).error.code, "endpoint.method_not_allowed");
   assert.equal((await requestEndpoint(base, { path: "https://evil.example/" })).error.code, "endpoint.path_invalid");
+});
+
+test("endpoint path resolution preserves base paths and rejects traversal", () => {
+  assert.equal(appendPath("https://query.wikidata.org/sparql").toString(), "https://query.wikidata.org/sparql");
+  assert.equal(appendPath("https://api.github.com", "repos/example/project").toString(), "https://api.github.com/repos/example/project");
+  assert.throws(() => appendPath("https://api.github.com/api", "../admin"), /escapes/);
 });
