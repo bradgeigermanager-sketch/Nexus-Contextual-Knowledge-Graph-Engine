@@ -42,3 +42,7 @@ Moduł łączy rekordy grafu, źródeł, twierdzeń, dowodów i artefaktów w je
 ## Aktualizacja: przechodzenie po powiązaniach
 
 Kod zawiera teraz ograniczony mechanizm przechodzenia po korpusie, który zaczyna od typowanego odwołania, takiego jak węzeł, krawędź, źródło, twierdzenie, odnośnik dowodowy lub artefakt. Zwraca osiągalne rekordy oraz ścieżki zachowujące typy relacji i dostępne odwołania do dowodów. Głębokość i liczba wyników są ograniczone. To deterministyczne przechodzenie po grafie, a nie wnioskowanie sieci neuronowej ani dowód prawdziwości; funkcja nie jest jeszcze podłączona do interfejsu przeglądarkowego.
+
+## Aktualizacja warstwy zapytań
+
+Moduł zapytań przyjmuje teraz typowaną referencję początkową i opcjonalny cel oraz filtry typu rekordu, typu artefaktu, statusu, domeny kontekstu i rodzaju lub typu relacji. Wynik informuje, czy osiągnięto cel, czy odkryta ścieżka spełnia filtry oraz czy przekroczono limit przeszukiwania. Ważne ograniczenie: filtry są stosowane po ograniczonym przejściu, a dla każdego osiągniętego rekordu zwracana jest tylko jedna najkrótsza odkryta ścieżka. Funkcja służy do nawigacji i przeglądu, nie do wyliczania wszystkich tras, rankingu semantycznego ani dowodzenia prawdy. Moduł nie jest jeszcze połączony z interfejsem przeglądarkowym.
