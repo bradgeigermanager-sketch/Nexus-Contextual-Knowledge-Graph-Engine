@@ -38,3 +38,7 @@ Prościej: system ma teraz wielokrotnego użytku sposób zebrania powiązanych r
 ## Aktualizacja modułu ładowania danych
 
 Moduł łączy rekordy grafu, źródeł, twierdzeń, dowodów i artefaktów w jeden sprawdzony zestaw z indeksami wyszukiwania. Zgłasza brakujące pliki i uszkodzone odwołania. To kontrola spójności danych, a nie sieć neuronowa ucząca się lub dowodząca faktów; moduł nie jest jeszcze podłączony do interfejsu przeglądarkowego.
+
+## Aktualizacja: przechodzenie po powiązaniach
+
+Kod zawiera teraz ograniczony mechanizm przechodzenia po korpusie, który zaczyna od typowanego odwołania, takiego jak węzeł, krawędź, źródło, twierdzenie, odnośnik dowodowy lub artefakt. Zwraca osiągalne rekordy oraz ścieżki zachowujące typy relacji i dostępne odwołania do dowodów. Głębokość i liczba wyników są ograniczone. To deterministyczne przechodzenie po grafie, a nie wnioskowanie sieci neuronowej ani dowód prawdziwości; funkcja nie jest jeszcze podłączona do interfejsu przeglądarkowego.
