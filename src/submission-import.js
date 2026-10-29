@@ -11,6 +11,7 @@ function parseSubmissionText(text, options = {}) {
   if (!["json", "jsonl"].includes(format)) return { valid: false, format, records: [], errors: [{ code: "import.format_unsupported", message: "Only JSON and JSONL are implemented." }], warnings: [] };
 
   const records = [], errors = [], warnings = [];
+  const seenIdempotencyKeys = new Set();
   let parsedValues = [];
   if (format === "json") {
     try {
@@ -31,6 +32,14 @@ function parseSubmissionText(text, options = {}) {
   for (let index = 0; index < parsedValues.length; index += 1) {
     const item = format === "jsonl" ? parsedValues[index] : { line: null, value: parsedValues[index] };
     const result = normalizeSubmission(item.value, options);
+    if (result.valid && typeof result.normalized.idempotencyKey === "string") {
+      const key = result.normalized.idempotencyKey;
+      if (seenIdempotencyKeys.has(key)) {
+        errors.push({ code: "import.duplicate_idempotency_key", line: item.line, index, message: "idempotencyKey is duplicated within this import batch." });
+        continue;
+      }
+      seenIdempotencyKeys.add(key);
+    }
     if (!result.valid) {
       errors.push({ code: "import.record_invalid", line: item.line, index, issues: result.errors });
       continue;
