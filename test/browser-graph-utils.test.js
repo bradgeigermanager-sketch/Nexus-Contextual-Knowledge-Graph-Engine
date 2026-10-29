@@ -16,10 +16,10 @@ const utils = sandbox.__testUtils;
 const plain = (value) => JSON.parse(JSON.stringify(value));
 
 const cypherStart = html.indexOf("                    } else if (format === 'cypher') {");
-const cypherEnd = html.indexOf("                    }\\n\\n                    setParsedPreview", cypherStart);
+const cypherEnd = html.indexOf("                    }\n\n                    setParsedPreview", cypherStart);
 if (cypherStart < 0 || cypherEnd < 0) throw new Error("Cypher import branch not found.");
 const cypherBranch = html.slice(cypherStart, cypherEnd);
-const cypherCode = cypherBranch.slice(cypherBranch.indexOf("\\n") + 1);
+const cypherCode = cypherBranch.slice(cypherBranch.indexOf("\n") + 1);
 const parseCypher = new Function("inputText", "graphCategory", "existingNodes", "existingEdges",
   "let newNodes = [], newEdges = [];" + cypherCode + "; return { newNodes, newEdges };");
 
@@ -69,8 +69,8 @@ test("application ingestion validates the combined candidate before state change
 });
 
 test("Cypher importer resolves exported MATCH aliases to node IDs and preserves weights", () => {
-  const source = "CREATE (:ENTITY {id: 'n1', label: 'User Query', desc: 'Description'})\\n" +
-    "CREATE (:CKG {id: 'n2', label: 'Financial Report', desc: 'Report'})\\n" +
+  const source = "CREATE (:ENTITY {id: 'n1', label: 'User Query', desc: 'Description'})\n" +
+    "CREATE (:CKG {id: 'n2', label: 'Financial Report', desc: 'Report'})\n" +
     "MATCH (a {id: 'n1'}), (b {id: 'n2'}) CREATE (a)-[:REFERENCES {weight: 0.9}]->(b)";
   const parsed = parseCypher(source, "ckg", [], []);
   assert.deepEqual(parsed.newNodes.map((node) => node.id), ["n1", "n2"]);
@@ -80,7 +80,7 @@ test("Cypher importer resolves exported MATCH aliases to node IDs and preserves 
 });
 
 test("Cypher importer maps CREATE variables and reads relationship weights", () => {
-  const source = "CREATE (n:CKG {id: 'ckg_12', label: 'Supply Chain Model', desc: 'Example'})\\n" +
+  const source = "CREATE (n:CKG {id: 'ckg_12', label: 'Supply Chain Model', desc: 'Example'})\n" +
     "CREATE (n)-[:IMPACTS {weight: 0.9}]->(n2)";
   const parsed = parseCypher(source, "ckg", [{ id: "n2", label: "Existing" }], []);
   assert.equal(parsed.newNodes[0].id, "ckg_12");
