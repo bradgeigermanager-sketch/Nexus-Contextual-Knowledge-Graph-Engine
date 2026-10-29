@@ -22,3 +22,13 @@ The graph archive and reference corpus currently use explicitly synthetic demons
 ## Validation
 
 The repository uses Node.js built-in tests and GitHub Actions to check graph structure, import/export helper behavior, archive fixtures, and reference-corpus relationships.
+
+## Multilingual system documentation
+
+The maintained documentation set provides a technical read-out and a plain-language guide in 13 languages: Arabic, English, Polish, German, French, Indonesian, Hindi, Simplified Chinese, Russian, Swahili, Greek, Japanese, and Spanish.
+
+- [Documentation index](docs/system-documentation.md)
+- [Documentation maintenance policy](docs/documentation-maintenance.md)
+- [Language manifest](docs/documentation-manifest.json)
+
+Each language has its own file under `docs/i18n/`. English is the terminology-control version; translations should be updated together whenever implementation status or system concepts change. The documentation distinguishes current implementation from planned work and labels synthetic examples as demonstrations rather than real-world evidence.
