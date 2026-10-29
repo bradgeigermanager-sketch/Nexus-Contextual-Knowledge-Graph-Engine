@@ -38,3 +38,7 @@ Kwa lugha rahisi, mfumo sasa una njia inayoweza kutumiwa tena kukusanya rekodi z
 ## Sasisho la kipakiaji cha mkusanyiko
 
 Kipakiaji sasa hukusanya rekodi za grafu, vyanzo, madai, ushahidi na vizalia vya ngazi ya juu katika mkusanyiko mmoja uliokaguliwa wenye faharasa za kutafuta. Faili zinazokosekana na marejeo yaliyovunjika huripotiwa. Hii ni kazi ya ulinganifu wa data, si mtandao wa neva unaojifunza au kuthibitisha ukweli; bado haijaunganishwa na kiolesura cha kivinjari.
+
+## Sasisho: ufuatiliaji wa mahusiano
+
+Msimbo sasa una utaratibu wenye mipaka wa kufuatilia korpasi kuanzia rejeleo lenye aina maalumu, kama nodi, ukingo, chanzo, dai, kiungo cha ushahidi au artefakti. Hurejesha rekodi zinazoweza kufikiwa na njia zinazohifadhi aina za mahusiano na marejeleo ya ushahidi yanayopatikana. Kina na idadi ya matokeo vinawekewa mipaka. Huu ni ufuatiliaji wa grafu unaofuata kanuni, si hitimisho la mtandao wa neva wala uthibitisho wa ukweli; bado haujaunganishwa na kiolesura cha kivinjari.
