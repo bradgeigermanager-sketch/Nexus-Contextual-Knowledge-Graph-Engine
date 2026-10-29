@@ -1712,22 +1712,25 @@
                         const colorMap = { ckg: '#38bdf8', entity: '#10b981', context: '#6366f1', temporal: '#a855f7', spatial: '#f59e0b', topical: '#ec4899' };
 
                         newNodes = rawNodes.map((n, i) => ({
-                            id: n.id || `node_imp_${Date.now()}_${i}`,
-                            label: n.label || 'Imported Node',
-                            type: n.type || (graphCategory === 'context' ? 'temporal' : graphCategory),
-                            color: colorMap[n.type] || colorMap[graphCategory] || '#38bdf8',
-                            val: 16,
-                            desc: n.desc || `Imported under ${graphCategory.toUpperCase()} graph schema.`,
-                            metrics: { source: `${graphCategory.toUpperCase()} JSON-LD`, status: 'Ingested' }
+                            ...n,
+                            id: n.id ?? `node_imp_${Date.now()}_${i}`,
+                            label: n.label ?? 'Imported Node',
+                            type: n.type ?? (graphCategory === 'context' ? 'temporal' : graphCategory),
+                            color: n.color || colorMap[n.type] || colorMap[graphCategory] || '#38bdf8',
+                            val: n.val ?? 16,
+                            desc: n.desc ?? `Imported under ${graphCategory.toUpperCase()} graph schema.`,
+                            metrics: n.metrics ?? { source: `${graphCategory.toUpperCase()} JSON-LD`, status: 'Ingested' }
                         }));
 
                         newEdges = rawEdges.map((e, i) => ({
-                            id: e.id || `edge_imp_${Date.now()}_${i}`,
+                            ...e,
+                            id: e.id ?? `edge_imp_${Date.now()}_${i}`,
                             source: e.source,
                             target: e.target,
-                            label: e.label || 'linked_to',
-                            weight: e.weight || 0.8
+                            label: e.label ?? 'linked_to',
+                            weight: e.weight ?? 0.8
                         }));
+
                     } else if (format === 'csv') {
                         const marker=/(?:^|\r?\n)---edges---(?:\r?\n|$)/,match=marker.exec(inputText);
                         if(!match)throw Error('CSV must contain a ---edges--- separator between nodes and edges.');
