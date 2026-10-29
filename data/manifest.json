@@ -20,7 +20,7 @@
       "path": "import-fixtures/graph.csv",
       "uiImportSupported": true,
       "knownLimitations": [
-        "Fixture uses the current importer’s expected node/edge section structure and avoids special characters; general quoted CSV support is not implemented."
+        "CSV quoted-field parser/exporter and preservation of node metrics/edge IDs have been implemented with regression tests; successful CI and full browser validation remain unconfirmed."
       ]
     },
     "cypher": {
