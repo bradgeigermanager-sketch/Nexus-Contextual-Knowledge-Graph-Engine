@@ -1,0 +1,236 @@
+Yes — and this is a great use of the layering we just discussed:
+a glossary generator is a meta-skill — it produces domain context (L0), often from tools/skills (L1/L2).
+
+Below is a pseudoprocedure set: not code, not prompt text, but an executable-shaped specification you can turn into Python + LLM calls.
+
+Goal
+
+Given:
+- a prompt
+- or a code/tool set
+- or a skill manifest
+
+Produce:
+a domain glossary: terms → definitions → relations → aliases → invariants
+
+Suitable for:
+- RAG chunk enrichment
+- tool description disambiguation
+- agent guardrail vocabulary
+- onboarding docs
+
+Inputs (what the procedure accepts)
+
+INPUT:
+  artifact :=
+    prompt_text?
+    tool_set?        # name, description, params
+    skill_manifest?  # intent, steps
+    code_symbols?    # functions/classes/endpoints
+    existing_glossary?
+
+CONFIG:
+  domain_hint?       # e.g. "e-commerce refunds"
+  depth := shallow | standard | deep
+  audience := model | human | both
+  relation_types := [is_a, part_of, triggers, conflicts_with, maps_to_tool]
+
+Pseudoprocedure Set
+
+P1 · Identify Candidate Domain
+
+P1:
+  IF prompt_text:
+     domain ← LLM(prompt_text, task="infer_domain")
+  ELSE IF tool_set:
+     domain ← cluster_tools_by_noun_phrases(tool_descriptions)
+  ELSE IF code_symbols:
+     domain ← extract_domain_from_symbols(code_symbols)
+
+  RETURN domain_profile(
+    name,
+    key_entities,
+    likely_subdomains
+  )
+
+P2 · Extract Term Candidates
+
+P2:
+  candidates ← ∅
+
+  candidates += noun_phrases(prompt_text)
+  candidates += param_names(tool_set)
+  candidates += enum_values(tool_set)
+  candidates += class_names(code_symbols)
+  candidates += intent_keywords(skill_manifest)
+  candidates += terms(existing_glossary)
+
+  candidates ← normalize(candidates)
+  candidates ← score(candidates, by freq + centrality)
+
+  RETURN top_k(candidates, k=depth_based())
+
+P3 · Disambiguate Terms Against Domain
+
+P3:
+  FOR term IN candidates:
+    entry ← LLM(
+      term,
+      context = domain_profile,
+      task = "define_in_domain"
+    )
+
+    entry MUST:
+      - avoid generic dictionary meaning
+      - mention domain-specific behavior
+      - note if term maps to a tool/param
+
+  RETURN raw_entries[]
+
+Example:
+“refund” → NOT “return money”
+“refund” → “cancel captured payment for an order in paid/shipped state”
+
+P4 · Establish Relations
+
+P4:
+  FOR (a,b) IN pair_combinations(terms):
+    rel ← LLM(a, b, task="classify_relation")
+
+  ALLOWED rel ∈ {
+    is_a,
+    part_of,
+    synonym,
+    triggers,
+    required_before,
+    conflicts_with,
+    maps_to_tool,
+    maps_to_param
+  }
+
+  KEEP rel ONLY IF confidence > threshold
+
+Output shape:
+order ── part_of ──→ commerce_domain
+refund ── triggers ──→ cancel_order
+invoice ── conflicts_with ──→ refund_if_uninvoiced
+
+P5 · Attach Tool / Code Anchors
+
+P5:
+  FOR term IN terms:
+    term.tool_refs ← tools_whose(
+      description ~ term
+      OR params contain term
+      OR output contains term
+    )
+    term.code_refs ← symbols_whose(name/doc ~ term)
+
+  IF term has NO tool_ref AND NO code_ref:
+     mark term AS "conceptual"
+
+This makes glossary actionable, not decorative.
+
+P6 · Infer Invariants / Guardrail Terms
+
+P6:
+  invariants ← LLM(
+    terms + tool_set,
+    task="extract_rules_that_must_hold"
+  )
+
+Examples:
+  - "refund only if order.status ∈ {paid, shipped}"
+  - "cancel_order requires reason"
+  - "invoice_present ⇒ refund needs finance_approval"
+
+MARK these as:
+  glossary.meta_rules
+
+P7 · Normalize Glossary Schema
+
+P7:
+  glossary := {
+    domain: str,
+    terms: [
+      {
+        term,
+        definition,
+        type: entity|action|state|policy|concept,
+        aliases[],
+        relates_to[]: {term, relation},
+        tool_refs[],
+        code_refs[],
+        invariants[]
+      }
+    ],
+    meta_rules[],
+    generated_for: artifact_id,
+    generated_at,
+    confidence
+  }
+
+P8 · Self-Check / Repair
+
+P8:
+  issues ← []
+  issues += terms_with_no_definition()
+  issues += circular_relations()
+  issues += terms_claiming_tool_but_tool_missing()
+
+  IF issues AND depth != shallow:
+     rerun P3–P4 on failing terms
+     log repairs
+
+P9 · Emit Formats
+
+P9:
+  emit_markdown(glossary)        # humans
+  emit_json_schema_terms(glossary)  # RAG / model context
+  emit_guardrail_prompt(glossary)   # L3 policy layer
+  emit_tool_tagging(glossary)       # attach to tool manifests
+
+How this fits your earlier layering
+
+Layer	Role in glossary skill
+L0	glossary output = domain context
+L1	term extraction uses tools (param/tool introspection)
+L2	glossary generation = a Skill
+L3	meta_rules → guardrails
+L4	Python runtime executes P1–P9
+
+Minimal “Skill Manifest” version
+
+name: generate_domain_glossary
+description: >
+  Build a domain glossary from a prompt, tool set, or skill manifest
+inputs:
+  - prompt_text?
+  - tool_set?
+  - skill_manifest?
+output:
+  glossary.json
+steps:
+  - identify_domain
+  - extract_terms
+  - define_in_domain
+  - link_relations
+  - anchor_to_tools
+  - extract_invariants
+  - emit_formats
+model_role: define / relate / infer
+system_role: extract symbols, validate, store
+
+Why this works well
+
+- LLM: handles meaning, relations, rules
+- Python: handles extraction, validation, ids, diffing
+- Glossary becomes first-class agent asset, not docs nobody reads
+
+If you want next, I can:
+1. Turn this into real Python + Pydantic
+2. Make a LangGraph skill out of it
+3. Show glossary → better function-calling example
+4. Design a glossary registry across multiple tool sets
+
+Which one?
