@@ -1,0 +1,24 @@
+{
+  "schema": "nexus-neural-artifact-links/v1",
+  "links": [
+    {
+      "linkId": "artifact-link-region-bundle-example",
+      "sourceArtifactId": "artifact-topic-region-example",
+      "sourceVersionId": "artifact-topic-region-example@1",
+      "targetArtifactId": "artifact-evidence-bundle-example",
+      "targetVersionId": "artifact-evidence-bundle-example@1",
+      "relationType": "contextualizes",
+      "directionality": "directed",
+      "weight": null,
+      "validTime": null,
+      "context": {
+        "domain": "demonstration"
+      },
+      "evidenceRefs": [
+        "evidence-example-001"
+      ],
+      "rationale": "Illustrative relationship between a graph region and a bundle of references.",
+      "synthetic": true
+    }
+  ]
+}
