@@ -63,7 +63,8 @@ test("CSV exporter escapes values accepted by the parser", () => {
 });
 
 test("application ingestion validates the combined candidate before state changes", () => {
-  assert.ok(html.includes("const candidateNodes=[...nodes,...newNodes],candidateEdges=[...edges,...newEdges]"));
+  assert.ok(html.includes("const candidateNodes = mode === 'replace' ? newNodes : [...nodes, ...newNodes]"));
+  assert.ok(html.includes("const candidateNodes = importMode === 'replace' ? parsedPreview.nodes"));
   assert.ok(html.includes("if(!validation.valid){showToast"));
   assert.ok(html.includes("const [initialGraph] = useState(() => loadSavedGraph())"));
 });
