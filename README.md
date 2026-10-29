@@ -36,3 +36,4 @@ Each language has its own file under `docs/i18n/`. English is the terminology-co
 - [Neural Network Artifact Layer design](docs/neural-artifact-layer.md)
 
 The automated Node.js test suite also checks multilingual documentation completeness against `docs/documentation-manifest.json`.
+- `src/neural-artifact-validation.js`: reusable validator for higher-order artifact records and their graph/evidence references.
