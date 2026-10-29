@@ -34,11 +34,9 @@ test("CSV fixture follows the application's node/edge section convention", () =>
   assert.equal(sections.length, 2);
   const nodeLines = sections[0].trim().split("\n");
   const edgeLines = sections[1].trim().split("\n");
-  assert.equal(nodeLines[0], "id,label,type,desc");
-  assert.equal(edgeLines[0], "source,target,label,weight");
+  assert.equal(nodeLines[0], "id,label,type,val,color,desc,metrics_json");
+  assert.equal(edgeLines[0], "id,source,target,label,weight");
   assert.equal(nodeLines.length - 1, 8);
   assert.equal(edgeLines.length - 1, 8);
-  // This fixture deliberately avoids commas, quotes, and newlines inside fields
-  // because the current UI parser uses naive split(','); broader CSV support
-  // remains a separate hardening task.
+  assert.ok(nodeLines[1].includes('"latency":"12ms","weight":0.95'));
 });
