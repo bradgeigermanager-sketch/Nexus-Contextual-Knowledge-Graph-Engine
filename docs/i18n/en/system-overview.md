@@ -36,3 +36,8 @@ When reading results, keep three questions separate: What does the record say? W
 The loader reads the graph, sources, claims, evidence links, artifacts, and artifact links together, validates their references, and builds lookup indexes. Missing files and broken references are reported rather than silently accepted. This is a data-loading and consistency feature, not a neural network that learns or proves facts.
 
 In simple terms: the system now has a reusable way to gather the connected records and check that their links point somewhere real before another part of the application uses them. The loader is not yet connected to the browser interface.
+
+
+## Corpus loader update
+
+The loader now gathers graph, source, claim, evidence, and higher-order artifact records into one validated snapshot with lookup indexes. Missing files and broken references are reported. It is a data consistency feature, not a neural network that learns or proves facts; it is not yet connected to the browser interface.
