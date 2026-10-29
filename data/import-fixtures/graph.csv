@@ -1,21 +1,19 @@
-# Nodes section (RFC 4180)
-id,label,type,val,color,desc,metrics_json
-"n1","User Query","entity","20","#10b981","Active user query payload seeking quarterly performance analysis","{""latency"":""12ms"",""weight"":0.95}"
-"n2","Financial Report","ckg","26","#38bdf8","Core Contextual Knowledge Graph entity representing SEC 10-Q filings","{""confidence"":""98%"",""vectorDim"":1536}"
-"n3","Q3 2026","temporal","18","#a855f7","Temporal constraint filter set to current fiscal quarter","{""timeframe"":""Q3-2026"",""scope"":""Exact""}"
-"n4","North America","spatial","18","#f59e0b","Geographic entity bound to regional operational centers","{""lat"":37.77,""lon"":-122.41}"
-"n5","Revenue Growth","topical","22","#ec4899","Topical domain topic vector for fiscal expansion and margins","{""relevance"":0.92,""status"":""Active""}"
-"n6","AI Market Trend","ckg","20","#38bdf8","Macroeconomic market trends generated from LLM extractions","{""cluster"":""Technology/AI"",""density"":0.84}"
-"n7","Regulatory Policy","context","18","#6366f1","Compliance & Governance restriction layers","{""complianceLevel"":""Tier-1 High Risk""}"
-"n8","Executive Briefing","entity","16","#10b981","Generated synthesis document target for RAG retrieval","{""status"":""Drafting"",""topK"":5}"
-
-# Edges section (RFC 4180)
-id,source,target,label,weight
-"e1","n1","n2","references","0.9"
-"e2","n2","n3","temporal_scope","0.8"
-"e3","n2","n4","spatial_bound","0.85"
-"e4","n2","n5","has_topic","0.95"
-"e5","n5","n6","correlated_with","0.75"
-"e6","n1","n7","constrained_by","0.88"
-"e7","n6","n4","regional_impact","0.7"
-"e8","n2","n8","synthesizes_into","0.92"
+id,label,type,desc
+n1,User Query,entity,Active user query payload seeking quarterly performance analysis
+n2,Financial Report,ckg,Core Contextual Knowledge Graph entity representing SEC 10-Q filings
+n3,Q3 2026,temporal,Temporal constraint filter set to current fiscal quarter
+n4,North America,spatial,Geographic entity bound to regional operational centers
+n5,Revenue Growth,topical,Topical domain topic vector for fiscal expansion and margins
+n6,AI Market Trend,ckg,Macroeconomic market trends generated from LLM extractions
+n7,Regulatory Policy,context,Compliance & Governance restriction layers
+n8,Executive Briefing,entity,Generated synthesis document target for RAG retrieval
+---edges---
+source,target,label,weight
+n1,n2,references,0.9
+n2,n3,temporal_scope,0.8
+n2,n4,spatial_bound,0.85
+n2,n5,has_topic,0.95
+n5,n6,correlated_with,0.75
+n1,n7,constrained_by,0.88
+n6,n4,regional_impact,0.7
+n2,n8,synthesizes_into,0.92
