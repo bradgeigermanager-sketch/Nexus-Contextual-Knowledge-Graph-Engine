@@ -1,10 +1,17 @@
 "use strict";
 
-const crypto = require("node:crypto");
 const { parseSubmissionText } = require("./submission-import");
 
 const keyOf = (type, id) => type + ":" + id;
-const stableJson = (value) => JSON.stringify(value, Object.keys(value || {}).sort());
+function candidateFingerprint(value) {
+  const text = JSON.stringify(value);
+  let hash = 2166136261;
+  for (let index = 0; index < text.length; index += 1) {
+    hash ^= text.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return { algorithm: "fnv1a-32", value: (hash >>> 0).toString(16).padStart(8, "0") };
+}
 
 function indexCorpus(corpus) {
   const data = corpus && corpus.data;
@@ -98,14 +105,14 @@ function stageSubmissionText(text, corpus, options = {}) {
     } else if (identity) {
       seen.set(identity, submission);
     }
-    const fingerprint = crypto.createHash("sha256").update(JSON.stringify(submission)).digest("hex");
+    const fingerprint = candidateFingerprint(submission);
     return {
       index: item.index, line: item.line,
       submissionId: submission.submissionId,
       recordType: submission.recordType,
       classification,
       issues,
-      fingerprint: { algorithm: "sha256", value: fingerprint },
+      fingerprint,
       provenance: submission.provenance,
       idempotencyKey: submission.idempotencyKey,
       submission,
