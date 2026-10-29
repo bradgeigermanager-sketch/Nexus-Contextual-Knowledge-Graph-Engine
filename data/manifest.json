@@ -20,7 +20,7 @@
       "path": "import-fixtures/graph.csv",
       "uiImportSupported": true,
       "knownLimitations": [
-        "Current parser splits fields on commas and does not support RFC 4180 quoting; compatibility requires parser repair."
+        "Fixture uses the current importer’s expected node/edge section structure and avoids special characters; general quoted CSV support is not implemented."
       ]
     },
     "cypher": {
