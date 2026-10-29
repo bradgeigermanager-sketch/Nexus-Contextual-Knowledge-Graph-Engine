@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/submission-envelope.schema.json",
+  "title": "Nexus canonical submission envelope",
+  "type": "object",
+  "required": ["schema", "submissionId", "recordType", "operation", "payload", "provenance", "idempotencyKey"],
+  "properties": {
+    "schema": { "const": "nexus-submission/v1" },
+    "submissionId": { "type": "string", "minLength": 1 },
+    "recordType": { "enum": ["node", "edge", "source", "claim_evidence"] },
+    "operation": { "enum": ["create_candidate", "upsert_candidate", "propose_supersession"] },
+    "payload": { "type": "object" },
+    "provenance": { "$ref": "#/$defs/provenance" },
+    "idempotencyKey": { "type": "string", "minLength": 8, "maxLength": 200 },
+    "submittedAt": { "type": "string", "format": "date-time" },
+    "submittedBy": { "type": "string", "minLength": 1 },
+    "dryRun": { "type": "boolean", "default": true }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "provenance": { "type": "object", "required": ["channel"], "properties": {
+      "channel": { "enum": ["api", "ui", "cli", "file_import", "agent", "connector", "manual"] },
+      "sourceRef": { "type": ["string", "null"] },
+      "externalRecordId": { "type": ["string", "null"] },
+      "contentHash": { "type": ["string", "null"] },
+      "transformation": { "type": ["string", "null"] }
+    }, "additionalProperties": true }
+  }
+}
