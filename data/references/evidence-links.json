@@ -1,0 +1,40 @@
+{
+  "schema": "nexus-reference-evidence-links/v1",
+  "evidenceLinks": [
+    {
+      "evidenceLinkId": "evidence-example-001",
+      "sourceId": "source-example-report-page",
+      "claimId": "claim-example-001",
+      "target": {
+        "kind": "path",
+        "sourceNodeId": "n2",
+        "edgeId": "e4",
+        "targetNodeId": "n5"
+      },
+      "stance": "contextualizes",
+      "relationType": "illustrates_graph_structure",
+      "locator": {
+        "page": null,
+        "section": "Synthetic example",
+        "paragraph": null,
+        "timecode": null,
+        "fragment": null
+      },
+      "excerpt": "Illustrative metadata only; no actual source passage is being quoted.",
+      "extraction": {
+        "method": "hand-authored-fixture",
+        "tool": null,
+        "model": null,
+        "extractedAt": "2026-10-28T00:00:00Z"
+      },
+      "verification": {
+        "status": "not_applicable_synthetic",
+        "reviewedAt": null,
+        "reviewer": null,
+        "notes": "Not factual evidence."
+      },
+      "confidence": null,
+      "synthetic": true
+    }
+  ]
+}
