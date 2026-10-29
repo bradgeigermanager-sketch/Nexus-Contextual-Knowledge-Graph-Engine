@@ -25,77 +25,35 @@ An artifact is a stable, versioned object that refers to existing objects withou
 
 ## Data model
 
-### Artifact definition
+An artifact has a stable `artifactId`, an immutable `versionId`, a controlled `artifactType`, human-readable label/description/status, typed `members`, explicit context, optional features, derivation metadata, evidence references, supersession references, and creation metadata. An artifact link connects two artifacts using a relation type and records directionality, optional weight, context, evidence references, rationale, and version endpoints.
 
-- artifactId: stable conceptual ID.
-- versionId: immutable version ID.
-- artifactType: controlled type, such as subgraph, context_bundle, evidence_bundle, topic_cluster, process_model, feature_set, embedding, model_output, rule_set, temporal_slice, spatial_region, or composite.
-- label, description, status: human-readable identity and lifecycle.
-- members: typed references to graph and corpus objects, each with role and optional weight/rationale.
-- context: scope, assumptions, time/place bounds, classification, and inclusion/exclusion criteria.
-- features: optional typed features; numeric values are not automatically factual.
-- derivation: origin, algorithm/model, parameters, input versions, run ID, and timestamp.
-- evidenceRefs: pointers to evidence links, claims, or source records relevant to the artifact.
-- supersedes, createdAt, createdBy, synthetic.
+Membership is not a claim of support. A member role describes why an object is included; evidence links separately describe how a source relates to a claim or target. Similarity, source reliability, claim support, extraction confidence, and factual truth must not be collapsed into one score.
 
-### Artifact-to-artifact links
+## Validator
 
-Use a separate relation record with linkId, sourceArtifactId/version, targetArtifactId/version, relationType, directionality, optional weight, valid time, context, evidence references, rationale, and provenance.
+`src/neural-artifact-validation.js` exports `validateNeuralArtifactCorpus(input)`. It checks collection shapes, duplicate identifiers, graph edge endpoints, typed member references, evidence references, supersession targets, artifact-link endpoints and version alignment, directionality, and finite weights. It returns `{ valid, errors, warnings, indexes }`. Optional `externalResolvers` allow future member types such as contexts, models, processes, and collections to be checked against their own ID sets.
 
-Relation vocabulary can include structural relations (contains, part_of, overlaps, adjacent_to), semantic relations (related_to, similar_to, contrasts_with, analogous_to), evidentiary relations (supports, contradicts, contextualizes, derived_from), procedural relations (depends_on, precedes, produces, consumes), and spatial/temporal relations (within_region, co_located_with, overlaps_in_time). Keep similarity distinct from evidentiary support.
-
-## Example use cases
-
-1. Source-connected knowledge region: a topic cluster contains a selected subgraph and links to sources, claims, and evidence passages.
-2. Context-sensitive edge interpretation: one canonical edge is referenced by two context artifacts with different periods, jurisdictions, or operating conditions.
-3. Cross-repository synthesis: artifacts from multiple repositories connect through typed links and provenance without being collapsed into an undifferentiated node.
-4. Process-to-evidence map: a process model connects inputs, steps, outputs, dependencies, and sources supporting each step.
-5. Alternative hypothesis comparison: competing artifacts expose shared and differing members, assumptions, evidence, and exclusions.
-6. Model-generated clusters: an algorithm proposes a cluster, records feature/embedding versions and parameters, and marks it proposed until reviewed.
-
-## Integrity checks
-
-- Every member reference resolves to an object in its declared domain and declared snapshot.
-- Every artifact link resolves to existing artifact IDs and versions.
-- Weights and similarity values use explicit named fields, finite numeric values, and documented ranges.
-- Detect cycles where acyclic composition is required; permit cycles only for relation types where they are meaningful.
-- Derived artifacts record input graph/corpus snapshots and derivation details.
-- Evidence references resolve and remain distinct from the artifact's own status.
-- Large recursive traversals have depth and size limits.
-- Schema validity, structural validity, semantic plausibility, and factual verification are separate stages.
-
-## Suggested implementation sequence
-
-1. Keep the first layer in versioned JSON with typed references and automated integrity tests.
-2. Add a loader that indexes artifacts and resolves member references against graph and reference-corpus records.
-3. Add UI overlays for membership, subgraph expansion/collapse, artifact navigation, and context filters.
-4. Add deterministic cluster/rule generation with recorded inputs and reproducible parameters.
-5. Add optional embeddings or learned models behind an interface. Preserve model name/version, vector dimensions, normalization, distance metric, input provenance, and uncertainty. Do not make the core graph depend on a particular ML framework.
-6. If scale requires it, move records into SQL while retaining portable versioned JSON exports.
-
-## Repository layout
-
-- data/artifacts/manifest.json
-- data/artifacts/artifacts.json
-- data/artifacts/artifact-links.json
-- schemas/neural-artifact.schema.json
-- test/neural-artifact.test.js
-
-This layer sits alongside the primary graph and reference corpus; it replaces neither.
-
-## Current validation module
-
-The reusable validator is implemented in `src/neural-artifact-validation.js` and exported as `validateNeuralArtifactCorpus(input)`. It checks required top-level collections, unique identifiers, graph edge endpoints, typed artifact member references, artifact evidence references, supersession targets, artifact-link endpoints and version alignment, link directionality, and finite numeric weights. It returns a structured result containing `valid`, `errors`, `warnings`, and lookup indexes for nodes, edges, artifacts, sources, claims, and evidence links.
-
-The validator accepts optional `externalResolvers` for member domains not yet stored in the current repository, such as contexts, models, processes, or collections. An unresolved extension type produces a warning rather than silently being treated as a verified reference. Known core types that lack a resolver are errors.
-
-This is structural and referential validation. It does not establish whether a claim is true, whether a source is trustworthy, or whether a cluster is semantically appropriate. Those require separate review and evidence-aware procedures.
-
+Validation checks structure and cross-references. It does not establish whether a claim is true, whether a source is trustworthy, or whether a cluster is semantically appropriate.
 
 ## Corpus loader and integrated validation
 
 The loader is implemented in `src/neural-artifact-corpus.js` and exported as `loadNeuralArtifactCorpus(options)`. It reads the canonical graph, source records, claims, evidence links, artifacts, and artifact links as one corpus, then invokes the reusable validator. On success it returns normalized collections, a validation report, the selected file paths, warnings, and lookup indexes for graph nodes, graph edges, artifacts, artifact versions, sources, claims, and evidence links.
 
-The default input paths are declared in `DEFAULT_FILES`. Tests or embedding applications may override paths and provide `rootDir`; extension member types may be resolved through `externalResolvers`. The loader checks configured paths remain within the selected root, reports missing or malformed files, and can optionally throw a `NeuralArtifactCorpusError` whose `report` property preserves the structured diagnostics. By default it returns the report instead of throwing, allowing callers to decide whether to block display, offer recovery, or show partial diagnostics.
+The loader's `DEFAULT_FILES` can be overridden. Callers may set `rootDir`, provide `externalResolvers`, and use `throwOnError` to receive a `NeuralArtifactCorpusError` with a structured `.report`. Configured input paths are checked to remain within the selected root. By default, loading returns diagnostics instead of throwing, so callers can decide how to handle incomplete data.
 
-The loader is not yet wired into the browser UI or import flow. The current indexes are in-memory JavaScript Maps for a loaded snapshot; they are not a persistent database, vector index, or trained neural network. Structural validity does not establish factual accuracy, source authority, semantic relevance, or the correctness of any inferred cluster. Callers should treat the corpus as untrusted input and keep errors, warnings, provenance, and synthetic-data labels visible.
+## Bounded traversal and query foundation
+
+`src/neural-artifact-traversal.js` exports `traverseNeuralArtifactCorpus(corpus, start, options)`. It begins from a typed reference—graph node, graph edge, source, claim, evidence link, or artifact—and returns reachable records plus shortest discovered paths with typed relationship steps. It can follow artifact membership, artifact-to-artifact links, and (when explicitly enabled) adjacent graph relationships.
+
+Options include `maxDepth` (default 3), `maxResults` (default 100), `artifactDirection` (`out`, `in`, or `both`), and `includeGraphNeighbors` (default false). Cycles are bounded by a visited set; result limits report `truncated: true`. Each path step preserves relationship kind, link ID where available, member role, evidence references, artifact version, edge label, and weight. An unresolved starting reference returns a warning rather than inventing a result.
+
+This is deterministic graph traversal, not semantic search, neural inference, automatic cluster discovery, or a truth-ranking system. The traversal currently uses the loaded in-memory snapshot and is not yet connected to the browser UI. Its path is an explanation of recorded links, not proof that a conclusion is correct.
+
+## Status and limitations
+
+- **Implemented:** typed artifact fixtures; reusable structural/reference validator; corpus loader with lookup indexes and root-path checks; bounded typed traversal with provenance-bearing paths and tests.
+- **Partial/limited:** artifact direction filtering and graph-neighbor expansion are simple deterministic traversal features; they do not provide a full query language or ranking engine.
+- **Planned:** browser UI integration, richer filters and query syntax, persisted indexes, semantic retrieval, automatic cluster proposals, and optional model-backed inference.
+- **Unverified:** whether the model of artifact types and relationships fits all future domains; future extension types require their own schemas and resolvers.
+
+All current graph/reference/artifact fixtures are synthetic demonstrations. The indexes are in-memory JavaScript Maps for a loaded snapshot, not a persistent database, vector index, or trained neural network. Treat source text and imported data as untrusted input, and keep errors, warnings, provenance, uncertainty, and synthetic-data labels visible.
