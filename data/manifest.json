@@ -27,7 +27,7 @@
       "path": "import-fixtures/graph.cypher",
       "uiImportSupported": true,
       "knownLimitations": [
-        "Simple regex parser only; edge weights and some properties are not preserved."
+        "Importer supports only a narrow regex-parsed Cypher subset; complex expressions, escaped string values, and arbitrary properties are not fully supported. Basic relationship endpoint alias resolution and numeric weight preservation are implemented, but full-fidelity round trips are not yet guaranteed."
       ]
     },
     "svg": {
