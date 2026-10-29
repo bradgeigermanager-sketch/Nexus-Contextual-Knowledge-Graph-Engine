@@ -41,6 +41,7 @@ These documents describe the repository state known at the time of writing. The 
 ## Related technical references
 - [Neural Network Artifact Layer design](neural-artifact-layer.md)
 - [LangChain-style orchestration construct model](langchain-constructs.md)
+- [Query and submission interface contracts](query-submission-interface.md)
 - [Reference and evidence corpus](reference-evidence-corpus.md)
 - [Graph data contract](graph-data-contract.md)
 
