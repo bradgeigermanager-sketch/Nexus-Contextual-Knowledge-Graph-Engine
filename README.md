@@ -15,6 +15,13 @@ A browser-based contextual knowledge graph application with a version-controlled
 
 The graph archive and reference corpus currently use explicitly synthetic demonstration data. They exercise schemas and relationships, not real-world factual assertions.
 
+## Public project site
+
+- [GitHub Pages implementation guide](docs/github-pages.md)
+- Static landing page source: `site/index.html`
+- Multilingual documentation reader: `site/docs.html`
+- Deployment workflow: `.github/workflows/pages.yml` (publishes only from `main`; branch and pull-request runs build the artifact without replacing the published site).
+
 ## Documentation
 
 - [Graph archive and format policy](docs/graph-archive.md)
