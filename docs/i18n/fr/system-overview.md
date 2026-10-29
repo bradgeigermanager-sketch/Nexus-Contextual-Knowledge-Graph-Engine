@@ -27,3 +27,9 @@ Un artefact pourrait réunir un rapport, un sujet, le lien entre eux et les sour
 Le système est encore en construction. Certaines vérifications, données d’exemple, schémas et tests automatiques existent déjà. L’éditeur visuel complet, la découverte automatique de groupes et l’analyse par un véritable réseau neuronal ne sont pas encore terminés. Les exemples marqués « synthétiques » servent à illustrer le fonctionnement et ne prouvent aucun fait réel.
 
 Pour chaque information, il faut distinguer trois questions : que dit l’enregistrement, quelle source l’appuie et quel est le degré de certitude de l’interprétation? Les désaccords et l’incertitude doivent rester visibles.
+
+## Nouvelle étape de chargement du corpus
+
+Le chargeur lit ensemble le graphe, les sources, les affirmations, les liens de preuve, les artefacts et leurs relations, puis vérifie les références et crée des index de recherche. Il signale les fichiers manquants et les références rompues au lieu de les accepter silencieusement. Il s’agit d’un mécanisme de chargement et de contrôle de cohérence, et non d’un réseau neuronal qui apprend ou prouve des faits.
+
+En termes simples, le système dispose désormais d’une méthode réutilisable pour rassembler les enregistrements liés et vérifier que leurs liens pointent vers des enregistrements existants avant qu’une autre partie de l’application les utilise. Le chargeur n’est pas encore relié à l’interface web.
