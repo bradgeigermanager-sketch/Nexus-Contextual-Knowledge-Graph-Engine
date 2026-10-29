@@ -9,6 +9,8 @@ A browser-based contextual knowledge graph application with a version-controlled
 - `data/references/`: source/work metadata, author and publisher attribution, structured claims, and evidence links.
 - `schemas/reference-corpus.schema.json`: JSON Schema for reference/evidence record shapes.
 - `data/artifacts/`: higher-order network artifacts that group and connect typed graph/corpus objects.
+- `data/orchestration/constructs.json`: synthetic declarative example of a framework-neutral orchestration construct with LangChain adapter metadata.
+- `schemas/orchestration-construct.schema.json`: JSON Schema for orchestration construct records.
 - `schemas/neural-artifact.schema.json`: schema for artifact records and artifact-to-artifact links.
 
 The graph archive and reference corpus currently use explicitly synthetic demonstration data. They exercise schemas and relationships, not real-world factual assertions.
@@ -19,6 +21,7 @@ The graph archive and reference corpus currently use explicitly synthetic demons
 - [Graph data contract](docs/graph-data-contract.md)
 - [Reference and evidence corpus](docs/reference-evidence-corpus.md)
 - [Neural Network Artifact Layer design, loader, validator, and traversal](docs/neural-artifact-layer.md)
+- [LangChain-style orchestration constructs](docs/langchain-constructs.md)
 
 ## Validation and query foundation
 
@@ -30,7 +33,7 @@ The repository uses Node.js built-in tests and GitHub Actions to check graph str
 - `src/neural-artifact-query.js`: typed start/target queries and post-traversal filters for record types, artifact types, statuses, contexts, and relationships.
 - `test/neural-artifact-corpus.test.js`, `test/neural-artifact-traversal.test.js`, and `test/neural-artifact-query.test.js`: loader, traversal, and query tests.
 
-Traversal and queries are deterministic graph exploration, not a trained neural network, semantic search engine, or truth-ranking system. Query filters are currently applied after bounded traversal, and only one shortest discovered path per reached reference is returned. The browser UI is not yet wired to the loader, traversal, or query API.
+The orchestration catalog is declarative groundwork, not a connected LangChain runtime. Construct examples are synthetic and execution-disabled. Traversal and queries are deterministic graph exploration, not a trained neural network, semantic search engine, or truth-ranking system. Query filters are currently applied after bounded traversal, and only one shortest discovered path per reached reference is returned. The browser UI is not yet wired to the loader, traversal, or query API.
 
 ## Multilingual system documentation
 
