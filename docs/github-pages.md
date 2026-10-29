@@ -6,11 +6,13 @@ The Pages site provides a public project landing page, a browser-based view of t
 
 ## Build layout
 
-The workflow builds a static artifact from the checked-out commit:
+The workflow first runs the repository's Node.js test suite, then invokes `node scripts/build-pages.js _site`. The build script loads the corpus with `loadNeuralArtifactCorpus`, refuses to publish a snapshot if validation fails, copies the static files, emits `data/portal-corpus.json`, and bundles the shared query/traversal and submission modules into `nexus-modules.js`. It also checks that required output files exist.
 
 - `site/index.html` → site root landing page.
 - `index.html` → `explorer.html`, preserving the existing browser UI without making it the landing page.
 - `site/docs.html` → documentation reader.
+- `site/portal.html` → read-only Nexus portal.
+- `scripts/build-pages.js` → validated corpus snapshot and generated browser bundle.
 - `docs/`, `data/`, and `schemas/` → read-only static files used by the reader and examples.
 - `.nojekyll` → avoids Jekyll processing of the artifact.
 
