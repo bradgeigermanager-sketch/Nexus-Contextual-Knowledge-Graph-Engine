@@ -1,0 +1,40 @@
+{
+  "schema": "nexus-web-endpoint-registry/v1",
+  "description": "Curated endpoint profiles. Enabled means the profile may be selected by an application; outbound calls still require runtime host allowlisting and network policy.",
+  "endpoints": [
+    {
+      "endpointId": "github-rest-api",
+      "version": "1",
+      "label": "GitHub REST API",
+      "purpose": "Repository metadata and public repository content via the GitHub REST API.",
+      "baseUrl": "https://api.github.com",
+      "allowedHosts": ["api.github.com"],
+      "allowedMethods": ["GET", "HEAD"],
+      "requestFormat": "none",
+      "responseFormat": "json",
+      "enabled": true,
+      "auth": { "type": "none", "secretRef": null, "headerName": null },
+      "security": { "requireHttps": true, "allowRedirects": false, "allowPrivateNetwork": false },
+      "limits": { "timeoutMs": 8000, "maxResponseBytes": 1000000 },
+      "defaultHeaders": { "Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" },
+      "tags": ["code", "repositories", "metadata"]
+    },
+    {
+      "endpointId": "wikidata-query-service",
+      "version": "1",
+      "label": "Wikidata SPARQL Query Service",
+      "purpose": "Read-only SPARQL queries against public Wikidata knowledge graph data.",
+      "baseUrl": "https://query.wikidata.org/sparql",
+      "allowedHosts": ["query.wikidata.org"],
+      "allowedMethods": ["GET", "POST"],
+      "requestFormat": "sparql-query",
+      "responseFormat": "sparql-json",
+      "enabled": true,
+      "auth": { "type": "none", "secretRef": null, "headerName": null },
+      "security": { "requireHttps": true, "allowRedirects": false, "allowPrivateNetwork": false },
+      "limits": { "timeoutMs": 12000, "maxResponseBytes": 2000000 },
+      "defaultHeaders": { "Accept": "application/sparql-results+json", "User-Agent": "Nexus-Contextual-Knowledge-Graph-Engine/endpoint-adapter" },
+      "tags": ["knowledge-graph", "sparql", "read-only"]
+    }
+  ]
+}
