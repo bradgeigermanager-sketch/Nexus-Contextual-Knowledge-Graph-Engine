@@ -8,6 +8,8 @@ A browser-based contextual knowledge graph application with a version-controlled
 - `data/import-fixtures/`: format-specific fixtures for the current import UI.
 - `data/references/`: source/work metadata, author and publisher attribution, structured claims, and evidence links.
 - `schemas/reference-corpus.schema.json`: JSON Schema for reference/evidence record shapes.
+- `data/artifacts/`: higher-order network artifacts that group and connect typed graph/corpus objects.
+- `schemas/neural-artifact.schema.json`: schema for artifact records and artifact-to-artifact links.
 
 The graph archive and reference corpus currently use explicitly synthetic demonstration data. They exercise schemas and relationships, not real-world factual assertions.
 
