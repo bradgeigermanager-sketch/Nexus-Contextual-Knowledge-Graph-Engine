@@ -82,3 +82,11 @@ Relation vocabulary can include structural relations (contains, part_of, overlap
 - test/neural-artifact.test.js
 
 This layer sits alongside the primary graph and reference corpus; it replaces neither.
+
+## Current validation module
+
+The reusable validator is implemented in `src/neural-artifact-validation.js` and exported as `validateNeuralArtifactCorpus(input)`. It checks required top-level collections, unique identifiers, graph edge endpoints, typed artifact member references, artifact evidence references, supersession targets, artifact-link endpoints and version alignment, link directionality, and finite numeric weights. It returns a structured result containing `valid`, `errors`, `warnings`, and lookup indexes for nodes, edges, artifacts, sources, claims, and evidence links.
+
+The validator accepts optional `externalResolvers` for member domains not yet stored in the current repository, such as contexts, models, processes, or collections. An unresolved extension type produces a warning rather than silently being treated as a verified reference. Known core types that lack a resolver are errors.
+
+This is structural and referential validation. It does not establish whether a claim is true, whether a source is trustworthy, or whether a cluster is semantically appropriate. Those require separate review and evidence-aware procedures.
