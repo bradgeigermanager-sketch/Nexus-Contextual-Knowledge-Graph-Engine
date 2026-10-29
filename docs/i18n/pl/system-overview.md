@@ -27,3 +27,9 @@ Przykładowy artefakt może łączyć raport, temat, relację między nimi i źr
 System nadal powstaje. Istnieją już niektóre kontrole danych, przykładowe rekordy, schematy i testy. Pełny edytor wizualny, automatyczne odkrywanie grup oraz analiza za pomocą rzeczywistej sieci neuronowej nie są jeszcze gotowe. Przykłady oznaczone jako syntetyczne służą demonstracji, a nie potwierdzaniu faktów.
 
 Przy każdej informacji warto osobno zapytać: co zapisano, jakie źródło to wspiera i jak pewna jest interpretacja? System powinien zachowywać rozbieżności i niepewność, zamiast je ukrywać.
+
+## Nowy etap ładowania zbioru danych
+
+Moduł wczytuje razem graf, źródła, twierdzenia, odnośniki do dowodów, artefakty i relacje między artefaktami, a następnie sprawdza odwołania i tworzy indeksy wyszukiwania. Zgłasza brakujące pliki i uszkodzone odwołania zamiast po cichu je akceptować. To funkcja ładowania i kontroli spójności danych, a nie sieć neuronowa, która uczy się lub dowodzi faktów.
+
+Prościej: system ma teraz wielokrotnego użytku sposób zebrania powiązanych rekordów i sprawdzenia, czy ich odnośniki prowadzą do istniejących rekordów, zanim użyje ich inna część aplikacji. Moduł nie jest jeszcze podłączony do interfejsu przeglądarkowego.
