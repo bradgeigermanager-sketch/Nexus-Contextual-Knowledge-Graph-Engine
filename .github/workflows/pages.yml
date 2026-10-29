@@ -19,25 +19,10 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-      - name: Prepare static Pages artifact
-        run: |
-          rm -rf _site
-          mkdir -p _site/docs
-          cp site/index.html _site/index.html
-          cp site/docs.html _site/docs.html
-          cp site/portal.html _site/portal.html
-          cp index.html _site/explorer.html
-          cp -R docs/. _site/docs/
-          cp -R data _site/data/
-          cp -R schemas _site/schemas/
-          cp data/implementation-status.json _site/data/implementation-status.json
-          touch _site/.nojekyll
-          test -s _site/index.html
-          test -s _site/docs.html
-          test -s _site/portal.html
-          test -s _site/data/implementation-status.json
-          test -s _site/explorer.html
-          test -s _site/docs/i18n/en/system-overview.md
+      - name: Run repository tests
+        run: node --test test/*.test.js
+      - name: Build validated static Pages artifact
+        run: node scripts/build-pages.js _site
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
