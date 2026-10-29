@@ -30,3 +30,14 @@ test("import enforces format, byte, and record limits", () => {
   const tooMany = parseSubmissionText(JSON.stringify([edge("record0001"), edge("record0002")]), { maxRecords: 1 });
   assert.equal(tooMany.errors[0].code, "import.record_limit_exceeded");
 });
+
+test("JSON and JSONL imports reject duplicate idempotency keys within a batch", () => {
+  const first = edge("duplicate0001");
+  const second = edge("duplicate0002");
+  second.idempotencyKey = first.idempotencyKey;
+  const result = parseSubmissionText(JSON.stringify([first, second]));
+  assert.equal(result.valid, false);
+  assert.equal(result.records.length, 1);
+  assert.ok(result.errors.some((e) => e.code === "import.duplicate_idempotency_key"));
+  assert.equal(result.committed, false);
+});
