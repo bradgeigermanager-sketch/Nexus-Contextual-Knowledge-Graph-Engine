@@ -1,0 +1,43 @@
+{
+  "schema": "nexus-reference-agents/v1",
+  "agents": [
+    {
+      "agentId": "agent-example-author",
+      "kind": "person",
+      "displayName": "Example Author",
+      "nameParts": {
+        "given": "Example",
+        "family": "Author"
+      },
+      "identifiers": [],
+      "synthetic": true
+    },
+    {
+      "agentId": "agent-example-publisher",
+      "kind": "organization",
+      "displayName": "Example Publisher",
+      "identifiers": [],
+      "synthetic": true
+    }
+  ],
+  "attributions": [
+    {
+      "attributionId": "attribution-example-author",
+      "agentId": "agent-example-author",
+      "workId": "work-example-report",
+      "role": "author",
+      "basis": "Illustrative metadata only",
+      "confidence": null,
+      "synthetic": true
+    },
+    {
+      "attributionId": "attribution-example-publisher",
+      "agentId": "agent-example-publisher",
+      "workId": "work-example-report",
+      "role": "publisher",
+      "basis": "Illustrative metadata only",
+      "confidence": null,
+      "synthetic": true
+    }
+  ]
+}
