@@ -22,6 +22,7 @@ The graph archive and reference corpus currently use explicitly synthetic demons
 - [Read-only Nexus portal](site/portal.html): graph search, bounded relationship inspection, source/evidence review, shared-module submission preview, endpoint directory, and implementation status.
 - [Implementation status registry](data/implementation-status.json).
 - Build script: `scripts/build-pages.js` (validates the corpus and generates the browser bundle).
+- Shared staging service: `src/portal-service.js` and `src/submission-staging.js` (review classifications, provenance preservation, and idempotency checks; no persistence).
 - Static landing page source: `site/index.html`
 - Multilingual documentation reader: `site/docs.html`
 - Deployment workflow: `.github/workflows/pages.yml` (publishes only from `main`; branch and pull-request runs build the artifact without replacing the published site).
