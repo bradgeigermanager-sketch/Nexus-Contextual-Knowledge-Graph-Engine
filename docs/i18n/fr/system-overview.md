@@ -42,3 +42,7 @@ Le chargeur rassemble désormais les enregistrements du graphe, des sources, des
 ## Mise à jour : parcours des relations
 
 Le code comprend désormais un parcours limité du corpus à partir d’une référence typée, par exemple un nœud, une arête, une source, une affirmation, un lien de preuve ou un artefact. Il renvoie les enregistrements accessibles et des chemins qui conservent les types de relation et les références de preuve disponibles. La profondeur et le nombre de résultats sont plafonnés. Il s’agit d’un parcours déterministe du graphe, et non d’une inférence neuronale ni d’une preuve de vérité ; cette fonction n’est pas encore reliée à l’interface du navigateur.
+
+## Mise à jour de la couche de requête
+
+Le module de requête accepte désormais une référence de départ typée et une cible facultative, ainsi que des filtres portant sur le type d’enregistrement, le type d’artefact, le statut, le domaine de contexte et le type ou la catégorie de relation. Le résultat indique si la cible a été atteinte, si un chemin découvert satisfait les filtres et si le parcours a été tronqué. Limite importante : les filtres sont appliqués après le parcours borné, et seul le plus court chemin découvert par enregistrement atteint est renvoyé. Cette fonction facilite la navigation et l’examen, mais ne recense pas tous les chemins, ne classe pas la pertinence sémantique et ne prouve pas la vérité. Le module n’est pas encore relié à l’interface du navigateur.
