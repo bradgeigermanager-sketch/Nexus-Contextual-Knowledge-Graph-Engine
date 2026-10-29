@@ -3,6 +3,7 @@
 const { loadNeuralArtifactCorpus } = require("./neural-artifact-corpus");
 const { queryNeuralArtifactCorpus } = require("./neural-artifact-query");
 const { parseSubmissionText } = require("./submission-import");
+const { stageSubmissionText } = require("./submission-staging");
 
 /**
  * Shared application-facing facade for the portal's query and candidate-review flow.
@@ -36,6 +37,10 @@ function createPortalService(options = {}) {
     },
     previewSubmissions(text, importOptions = {}) {
       const result = parseSubmissionText(text, importOptions);
+      return { ...result, committed: false, persistence: "not_configured" };
+    },
+    stageSubmissions(text, stageOptions = {}) {
+      const result = stageSubmissionText(text, corpus, stageOptions);
       return { ...result, committed: false, persistence: "not_configured" };
     }
   });
