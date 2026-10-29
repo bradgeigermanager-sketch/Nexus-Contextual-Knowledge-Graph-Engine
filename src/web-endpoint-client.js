@@ -33,11 +33,11 @@ function validateEndpointProfile(profile) {
   return { valid: errors.length === 0, errors };
 }
 function appendPath(baseUrl, path = "") {
-  if (typeof path !== "string" || path.startsWith("//") || path.includes("\\\\") || /^[a-z][a-z0-9+.-]*:/i.test(path)) throw new Error("path must be a relative URL path");
+  if (typeof path !== "string" || path.startsWith("//") || path.includes("\\") || /^[a-z][a-z0-9+.-]*:/i.test(path)) throw new Error("path must be a relative URL path");
   const base = new URL(baseUrl);
   if (!path) return base;
   const basePath = base.pathname.endsWith("/") ? base.pathname : base.pathname + "/";
-  const result = new URL(path.replace(/^\\/+/, ""), new URL(base.origin + basePath));
+  const result = new URL(path.replace(/^\/+/, ""), new URL(base.origin + basePath));
   if (result.origin !== base.origin || (!result.pathname.startsWith(basePath) && result.pathname !== base.pathname)) throw new Error("request path escapes the configured base URL");
   return result;
 }
