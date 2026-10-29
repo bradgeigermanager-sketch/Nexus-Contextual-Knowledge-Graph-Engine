@@ -33,3 +33,8 @@ Bei jeder Information sollten drei Fragen getrennt bleiben: Was steht im Datensa
 Der Loader liest Graph, Quellen, Aussagen, Beweisverknüpfungen, Artefakte und Artefaktverknüpfungen gemeinsam ein, prüft ihre Referenzen und erstellt Suchindizes. Fehlende Dateien und ungültige Verweise werden gemeldet, statt stillschweigend akzeptiert zu werden. Dies ist eine Funktion zum Laden und Prüfen der Datenkonsistenz, kein neuronales Netz, das Fakten erlernt oder beweist.
 
 Einfach gesagt: Das System kann zusammengehörige Datensätze jetzt auf wiederverwendbare Weise sammeln und prüfen, ob ihre Verknüpfungen auf vorhandene Datensätze zeigen, bevor ein anderer Anwendungsteil sie nutzt. Der Loader ist noch nicht mit der Browseroberfläche verbunden.
+
+
+## Aktualisierung des Datenladeprogramms
+
+Der Loader führt Graph-, Quellen-, Aussagen-, Beweis- und Artefaktdatensätze zu einem geprüften Datenstand mit Suchindizes zusammen. Fehlende Dateien und ungültige Verweise werden gemeldet. Dies ist eine Funktion zur Datenkonsistenz, kein neuronales Netz zum Lernen oder Beweisen von Fakten; die Browseroberfläche ist noch nicht angebunden.
