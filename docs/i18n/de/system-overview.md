@@ -27,3 +27,9 @@ Ein Artefakt könnte zum Beispiel einen Bericht, ein Thema, die Verbindung zwisc
 Das System wird noch entwickelt. Einige Datenprüfungen, Beispieldatensätze, Schemata und automatische Tests sind vorhanden. Ein vollständiger visueller Editor, automatische Gruppenerkennung und echte Analysen mit neuronalen Netzen sind noch nicht fertig. Als synthetisch gekennzeichnete Beispiele dienen nur der Demonstration und belegen keine realen Tatsachen.
 
 Bei jeder Information sollten drei Fragen getrennt bleiben: Was steht im Datensatz? Welche Quelle stützt es? Wie sicher ist die Interpretation? Widersprüche und Unsicherheit sollen sichtbar bleiben.
+
+## Neuer Schritt zum Laden des Datenbestands
+
+Der Loader liest Graph, Quellen, Aussagen, Beweisverknüpfungen, Artefakte und Artefaktverknüpfungen gemeinsam ein, prüft ihre Referenzen und erstellt Suchindizes. Fehlende Dateien und ungültige Verweise werden gemeldet, statt stillschweigend akzeptiert zu werden. Dies ist eine Funktion zum Laden und Prüfen der Datenkonsistenz, kein neuronales Netz, das Fakten erlernt oder beweist.
+
+Einfach gesagt: Das System kann zusammengehörige Datensätze jetzt auf wiederverwendbare Weise sammeln und prüfen, ob ihre Verknüpfungen auf vorhandene Datensätze zeigen, bevor ein anderer Anwendungsteil sie nutzt. Der Loader ist noch nicht mit der Browseroberfläche verbunden.
