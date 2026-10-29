@@ -41,3 +41,7 @@ In simple terms: the system now has a reusable way to gather the connected recor
 ## Corpus loader update
 
 The loader now gathers graph, source, claim, evidence, and higher-order artifact records into one validated snapshot with lookup indexes. Missing files and broken references are reported. It is a data consistency feature, not a neural network that learns or proves facts; it is not yet connected to the browser interface.
+
+## Traversal and query foundation
+
+The new traversal module starts from a typed reference and follows recorded artifact membership, artifact links, and optionally graph-neighbor relationships. It returns reachable records and paths with relationship and provenance metadata. Depth and result count are bounded, and missing start references are reported. This is deterministic graph traversal—not neural inference, semantic ranking, or proof that a claim is true. It is not yet connected to the browser interface.
