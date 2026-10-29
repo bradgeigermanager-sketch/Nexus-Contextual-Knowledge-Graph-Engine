@@ -1744,50 +1744,55 @@
                         newEdges=er.map((row,i)=>({id:ei.id!==undefined&&row[ei.id]?.trim()?row[ei.id].trim():`csv_e_${i}`,source:row[ei.source]?.trim(),target:row[ei.target]?.trim(),label:row[ei.label]?.trim()||'relates',weight:row[ei.weight]===''||row[ei.weight]===undefined?0.8:Number(row[ei.weight])}));
                     } else if (format === 'cypher') {
                         // Supported subset: CREATE nodes with property maps and directed relationships.
-                        const nodeMatches = [...inputText.matchAll(/CREATE\\s*\\(([^:]+):?([^\\s{]*)\\s*\\{([^}]+)\\}\\)/gi)];
+                        const nodeMatches = [...inputText.matchAll(/CREATE\s*\(([^:]+):?([^\s{]*)\s*\{([^}]+)\}\)/gi)];
                         const colorMap = { ckg: '#38bdf8', entity: '#10b981', context: '#6366f1', temporal: '#a855f7', spatial: '#f59e0b', topical: '#ec4899' };
                         const variableToId = new Map();
+                        const quotedPatterns = {
+                            id: /id:\s*['"]([^'"]*)['"]/i,
+                            label: /label:\s*['"]([^'"]*)['"]/i,
+                            desc: /desc:\s*['"]([^'"]*)['"]/i,
+                            type: /type:\s*['"]([^'"]*)['"]/i,
+                            color: /color:\s*['"]([^'"]*)['"]/i
+                        };
                         const quotedProperty = (props, name) => {
-                            const found = props.match(new RegExp(name + `:\\s*['"]([^'"]*)['"]`, 'i'));
+                            const found = (quotedPatterns[name] || /$a/).exec(props);
                             return found ? found[1] : null;
                         };
                         newNodes = nodeMatches.map((m, i) => {
                             const props = m[3];
-                            const id = quotedProperty(props, 'id') || `cypher_n_${i}`;
+                            const id = quotedProperty(props, 'id') || ('cypher_n_' + i);
                             const variable = m[1].trim();
                             if (variable) variableToId.set(variable, id);
                             const label = quotedProperty(props, 'label') || 'Cypher Node';
                             const desc = quotedProperty(props, 'desc') || 'Cypher Query Extraction';
                             const declaredType = quotedProperty(props, 'type');
-                            const typeToken = declaredType || m[2] || graphCategory;
-                            const nodeType = ['ckg','entity','context','temporal','spatial','topical'].includes(typeToken.toLowerCase())
-                                ? typeToken.toLowerCase()
+                            const typeToken = (declaredType || m[2] || graphCategory).toLowerCase();
+                            const nodeType = ['ckg','entity','context','temporal','spatial','topical'].includes(typeToken)
+                                ? typeToken
                                 : (graphCategory === 'context' ? 'temporal' : graphCategory);
-                            const valMatch = props.match(/val:\\s*(-?\\d+(?:\\.\\d+)?)/i);
+                            const valMatch = /val:\s*(-?\d+(?:\.\d+)?)/i.exec(props);
                             const colorMatch = quotedProperty(props, 'color');
                             return {
-                                id, label, type: nodeType,
+                                id: id, label: label, type: nodeType,
                                 color: colorMatch || colorMap[nodeType] || '#38bdf8',
                                 val: valMatch ? Number(valMatch[1]) : 16,
-                                desc, metrics: { source: 'Cypher Query' }
+                                desc: desc, metrics: { source: 'Cypher Query' }
                             };
                         });
-
-                        // Resolve aliases in MATCH (alias {id: 'node-id'}) as well as CREATE variables.
                         const aliasToId = new Map();
-                        for (const match of inputText.matchAll(/\\((\\w+)\\s*\\{\\s*id:\\s*['"]([^'"]+)['"]\\s*\\}\\)/gi)) {
+                        for (const match of inputText.matchAll(/\((\w+)\s*\{\s*id:\s*['"]([^'"]+)['"]\s*\}\)/gi)) {
                             aliasToId.set(match[1], match[2]);
                         }
-                        const knownIds = new Set([...existingNodes.map(n => n.id), ...newNodes.map(n => n.id)]);
-                        const edgeMatches = [...inputText.matchAll(/\\(([^)]+)\\)-\\[:([^\\]\\s]+)\\s*\\{?([^}]*)\\}?\\]->\\(([^)]+)\\)/gi)];
+                        const edgeMatches = [...inputText.matchAll(/\(([^)]+)\)-\[:([^\]\s]+)\s*\{?([^}]*)\}?\]->\(([^)]+)\)/gi)];
                         newEdges = edgeMatches.map((m, i) => {
                             const rawSource = m[1].trim(), rawTarget = m[4].trim();
-                            const source = aliasToId.get(rawSource) || variableToId.get(rawSource) || rawSource;
-                            const target = aliasToId.get(rawTarget) || variableToId.get(rawTarget) || rawTarget;
-                            const weightMatch = m[3].match(/weight:\\s*(-?\\d+(?:\\.\\d+)?)/i);
                             return {
-                                id: `cypher_e_${i}`, source, target, label: m[2].trim(),
-                                weight: weightMatch ? Number(weightMatch[1]) : 0.85
+                                id: 'cypher_e_' + i,
+                                source: aliasToId.get(rawSource) || variableToId.get(rawSource) || rawSource,
+                                target: aliasToId.get(rawTarget) || variableToId.get(rawTarget) || rawTarget,
+                                label: m[2].trim(),
+                                weight: ((/weight:\s*(-?\d+(?:\.\d+)?)/i).exec(m[3]) || [])[1] !== undefined
+                                    ? Number((/weight:\s*(-?\d+(?:\.\d+)?)/i).exec(m[3])[1]) : 0.85
                             };
                         });
                     }
