@@ -38,5 +38,5 @@ test("CSV fixture follows the application's node/edge section convention", () =>
   assert.equal(edgeLines[0], "id,source,target,label,weight");
   assert.equal(nodeLines.length - 1, 8);
   assert.equal(edgeLines.length - 1, 8);
-  assert.ok(nodeLines[1].includes('"latency":"12ms","weight":0.95'));
+  assert.ok(nodeLines[1].includes('""latency"":""12ms"",""weight"":0.95'));
 });
