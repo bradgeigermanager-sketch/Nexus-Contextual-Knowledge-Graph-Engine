@@ -47,3 +47,18 @@ test("portal submission preview uses repository JSONL importer and never commits
   assert.equal(result.committed, false);
   assert.equal(result.records.length, 1);
 });
+
+test("portal service stages candidates with explicit review classification", () => {
+  const service = createPortalService({ rootDir: path.join(__dirname, "..") });
+  const envelope = {
+    schema: "nexus-submission/v1", submissionId: "portal-stage-0001",
+    recordType: "node", operation: "create_candidate",
+    payload: { externalId: "portal-stage-candidate-1", node: { type: "concept", label: "Staging candidate" } },
+    provenance: { channel: "portal_test", sourceRef: "source:source-example-report-page" },
+    idempotencyKey: "portal-stage-key-0001"
+  };
+  const result = service.stageSubmissions(JSON.stringify(envelope));
+  assert.equal(result.records[0].classification, "ready_for_review");
+  assert.equal(result.records[0].provenance.sourceRef, "source:source-example-report-page");
+  assert.equal(result.committed, false);
+});
