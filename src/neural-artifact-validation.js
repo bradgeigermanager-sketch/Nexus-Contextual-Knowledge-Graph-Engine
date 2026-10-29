@@ -102,7 +102,7 @@ function validateNeuralArtifactCorpus(input = {}) {
       } else if (KNOWN_MEMBER_TYPES.has(member.refType)) {
         errors.push("no resolver available for member type " + member.refType);
       } else {
-        warnings.push("unresolved extension member type " + member.refType + " on artifact " + artifact.artifactId);
+        warnings.push("unresolved extension member type " + member.refType + ":" + member.refId + " on artifact " + artifact.artifactId);
       }
     }
     for (const evidenceRef of artifact.evidenceRefs || []) {
