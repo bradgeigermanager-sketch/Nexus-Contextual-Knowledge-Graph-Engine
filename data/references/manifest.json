@@ -1,0 +1,22 @@
+{
+  "schema": "nexus-reference-corpus-manifest/v1",
+  "dataset": "illustrative-reference-evidence-corpus",
+  "version": "0.1.0",
+  "status": "schema-prototype",
+  "synthetic": true,
+  "description": "Synthetic example records demonstrate the reference/evidence model and are not factual citations.",
+  "files": {
+    "sources": "sources.json",
+    "agents": "agents.json",
+    "claims": "claims.json",
+    "evidenceLinks": "evidence-links.json"
+  },
+  "counts": {
+    "sources": 1,
+    "agents": 2,
+    "claims": 1,
+    "evidenceLinks": 1
+  },
+  "graphDataset": "initial-application-seed-graph",
+  "factualValidity": "Records illustrate structure only; no real-world factual claims are made."
+}
