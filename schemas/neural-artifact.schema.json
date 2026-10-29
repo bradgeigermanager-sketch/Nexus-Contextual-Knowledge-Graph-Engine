@@ -1,0 +1,253 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/neural-artifact.schema.json",
+  "title": "Nexus neural artifact layer records",
+  "description": "Schema prototype for typed higher-order graph artifacts and their links.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/artifact"
+    },
+    {
+      "$ref": "#/$defs/artifactLink"
+    }
+  ],
+  "$defs": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "member": {
+      "type": "object",
+      "required": [
+        "refType",
+        "refId",
+        "role"
+      ],
+      "properties": {
+        "refType": {
+          "enum": [
+            "graph_node",
+            "graph_edge",
+            "source",
+            "claim",
+            "evidence_link",
+            "context",
+            "artifact",
+            "model",
+            "process",
+            "collection"
+          ]
+        },
+        "refId": {
+          "$ref": "#/$defs/id"
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "weight": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "rationale": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "artifact": {
+      "type": "object",
+      "required": [
+        "artifactId",
+        "versionId",
+        "artifactType",
+        "label",
+        "status",
+        "members",
+        "synthetic"
+      ],
+      "properties": {
+        "artifactId": {
+          "$ref": "#/$defs/id"
+        },
+        "versionId": {
+          "$ref": "#/$defs/id"
+        },
+        "artifactType": {
+          "enum": [
+            "subgraph",
+            "context_bundle",
+            "evidence_bundle",
+            "topic_cluster",
+            "process_model",
+            "feature_set",
+            "embedding",
+            "model_output",
+            "rule_set",
+            "temporal_slice",
+            "spatial_region",
+            "composite",
+            "other"
+          ]
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "proposed",
+            "active",
+            "review_required",
+            "disputed",
+            "superseded",
+            "rejected",
+            "archived"
+          ]
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/member"
+          }
+        },
+        "context": {
+          "type": "object"
+        },
+        "features": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "derivation": {
+          "type": "object"
+        },
+        "evidenceRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        },
+        "supersedes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "createdBy": {
+          "type": "string"
+        },
+        "synthetic": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": true
+    },
+    "artifactLink": {
+      "type": "object",
+      "required": [
+        "linkId",
+        "sourceArtifactId",
+        "targetArtifactId",
+        "relationType",
+        "directionality",
+        "synthetic"
+      ],
+      "properties": {
+        "linkId": {
+          "$ref": "#/$defs/id"
+        },
+        "sourceArtifactId": {
+          "$ref": "#/$defs/id"
+        },
+        "sourceVersionId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "targetArtifactId": {
+          "$ref": "#/$defs/id"
+        },
+        "targetVersionId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "relationType": {
+          "enum": [
+            "contains",
+            "part_of",
+            "overlaps",
+            "adjacent_to",
+            "related_to",
+            "similar_to",
+            "contrasts_with",
+            "analogous_to",
+            "supports",
+            "contradicts",
+            "contextualizes",
+            "derived_from",
+            "depends_on",
+            "precedes",
+            "produces",
+            "consumes",
+            "overlaps_in_time",
+            "co_located_with",
+            "within_region",
+            "transforms",
+            "other"
+          ]
+        },
+        "directionality": {
+          "enum": [
+            "directed",
+            "undirected"
+          ]
+        },
+        "weight": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "validTime": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "context": {
+          "type": "object"
+        },
+        "evidenceRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        },
+        "rationale": {
+          "type": "string"
+        },
+        "synthetic": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}
