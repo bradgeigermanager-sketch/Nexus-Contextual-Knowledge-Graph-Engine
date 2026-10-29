@@ -33,3 +33,8 @@ Pour chaque information, il faut distinguer trois questions : que dit l’enregi
 Le chargeur lit ensemble le graphe, les sources, les affirmations, les liens de preuve, les artefacts et leurs relations, puis vérifie les références et crée des index de recherche. Il signale les fichiers manquants et les références rompues au lieu de les accepter silencieusement. Il s’agit d’un mécanisme de chargement et de contrôle de cohérence, et non d’un réseau neuronal qui apprend ou prouve des faits.
 
 En termes simples, le système dispose désormais d’une méthode réutilisable pour rassembler les enregistrements liés et vérifier que leurs liens pointent vers des enregistrements existants avant qu’une autre partie de l’application les utilise. Le chargeur n’est pas encore relié à l’interface web.
+
+
+## Mise à jour du chargeur de corpus
+
+Le chargeur rassemble désormais les enregistrements du graphe, des sources, des affirmations, des preuves et des artefacts dans un ensemble vérifié avec des index de recherche. Il signale les fichiers manquants et les références rompues. C’est une fonction de cohérence des données, pas un réseau neuronal qui apprend ou prouve des faits ; elle n’est pas encore reliée à l’interface du navigateur.
