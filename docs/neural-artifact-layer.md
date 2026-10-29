@@ -57,3 +57,13 @@ This is deterministic graph traversal, not semantic search, neural inference, au
 - **Unverified:** whether the model of artifact types and relationships fits all future domains; future extension types require their own schemas and resolvers.
 
 All current graph/reference/artifact fixtures are synthetic demonstrations. The indexes are in-memory JavaScript Maps for a loaded snapshot, not a persistent database, vector index, or trained neural network. Treat source text and imported data as untrusted input, and keep errors, warnings, provenance, uncertainty, and synthetic-data labels visible.
+
+
+## Typed query layer
+
+`src/neural-artifact-query.js` exports `queryNeuralArtifactCorpus(corpus, query)`. A query begins with a typed `start` reference and may specify a typed `target`, traversal bounds, artifact-link direction, and optional filters for returned reference types, artifact types, statuses, context domains, relationship kinds, and relationship types.
+
+The result contains filtered records, paths satisfying the requested path filters, target reachability/match flags, warnings, the filters used, and explicit limitations. `incomplete` is true when traversal was truncated or the loaded corpus is invalid. An unreached target is distinguished from a reached target whose discovered path fails the requested relationship filters.
+
+**Important query semantics:** filters are currently applied after bounded traversal; they do not constrain which paths are explored. Only the shortest discovered path per reached reference is available, so this does not enumerate every possible route. A filter can therefore exclude the discovered path even if another unenumerated path might satisfy it. Use these results for structural navigation and review, not as proof, a complete path inventory, or semantic ranking.
+
