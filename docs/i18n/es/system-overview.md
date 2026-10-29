@@ -31,3 +31,7 @@ Para cada información, separe tres preguntas: ¿qué dice el registro?, ¿qué 
 ## Actualización del cargador del corpus
 
 El cargador reúne ahora los registros del grafo, las fuentes, las afirmaciones, las pruebas y los artefactos compuestos en un conjunto validado con índices de consulta. Informa de archivos ausentes y referencias no válidas. Es una función de coherencia de datos, no una red neuronal que aprende o demuestra hechos; todavía no está conectada a la interfaz del navegador.
+
+## Actualización: recorrido de relaciones
+
+El código ahora incluye un recorrido limitado del corpus que comienza en una referencia tipada, como un nodo, una arista, una fuente, una afirmación, un enlace de evidencia o un artefacto. Devuelve los registros alcanzables y rutas que conservan los tipos de relación y las referencias de evidencia disponibles. La profundidad y la cantidad de resultados tienen límites. Es un recorrido determinista del grafo, no una inferencia de red neuronal ni una prueba de veracidad; todavía no está conectado a la interfaz del navegador.
