@@ -63,3 +63,8 @@ schemas/adapter-manifest.schema.json describes adapter ID/version, direction, fo
 3. Add corpus-snapshot reference resolution and duplicate/conflict reports.
 4. Add alternative-path discovery and relationship comparison to the query engine.
 5. Design authenticated API routes and a review/staging UI after these contracts stabilize.
+
+
+## Review decision contract
+
+`schemas/submission-review-decision.schema.json` defines `nexus-review-decision/v1`. A proposed decision is tied to a submission ID, candidate fingerprint, corpus snapshot ID, reviewer subject, timestamp, decision, and rationale. The review helper supports accept, reject, request-more-evidence, and defer; requests for more evidence must include concrete follow-up items. `src/submission-review.js` groups staging classifications and checks decision shape and candidate/snapshot binding. It does not authenticate the reviewer, verify role membership, establish factual correctness, create an immutable audit event, or persist a decision. The fingerprint is FNV-1a 32-bit and is not cryptographic.
