@@ -27,9 +27,10 @@ The repository uses Node.js built-in tests and GitHub Actions to check graph str
 - `src/neural-artifact-validation.js`: reusable structural and cross-reference validator.
 - `src/neural-artifact-corpus.js`: loads the graph, references, evidence, artifacts, and artifact links into one validated snapshot with lookup indexes.
 - `src/neural-artifact-traversal.js`: bounded typed traversal from nodes, edges, sources, claims, evidence links, or artifacts; returns paths that preserve relationship and provenance metadata.
-- `test/neural-artifact-corpus.test.js` and `test/neural-artifact-traversal.test.js`: loader and traversal tests.
+- `src/neural-artifact-query.js`: typed start/target queries and post-traversal filters for record types, artifact types, statuses, contexts, and relationships.
+- `test/neural-artifact-corpus.test.js`, `test/neural-artifact-traversal.test.js`, and `test/neural-artifact-query.test.js`: loader, traversal, and query tests.
 
-Traversal is deterministic graph exploration, not a trained neural network, semantic search engine, or truth-ranking system. The browser UI is not yet wired to the loader or traversal API.
+Traversal and queries are deterministic graph exploration, not a trained neural network, semantic search engine, or truth-ranking system. Query filters are currently applied after bounded traversal, and only one shortest discovered path per reached reference is returned. The browser UI is not yet wired to the loader, traversal, or query API.
 
 ## Multilingual system documentation
 
