@@ -38,3 +38,7 @@ Einfach gesagt: Das System kann zusammengehörige Datensätze jetzt auf wiederve
 ## Aktualisierung des Datenladeprogramms
 
 Der Loader führt Graph-, Quellen-, Aussagen-, Beweis- und Artefaktdatensätze zu einem geprüften Datenstand mit Suchindizes zusammen. Fehlende Dateien und ungültige Verweise werden gemeldet. Dies ist eine Funktion zur Datenkonsistenz, kein neuronales Netz zum Lernen oder Beweisen von Fakten; die Browseroberfläche ist noch nicht angebunden.
+
+## Aktualisierung: Traversierung von Verbindungen
+
+Der Code enthält jetzt eine begrenzte Traversierungsfunktion, die bei einer typisierten Referenz beginnt, etwa einem Knoten, einer Kante, einer Quelle, einer Behauptung, einem Evidenzverweis oder einem Artefakt. Sie liefert erreichbare Datensätze und Pfade, die Beziehungstypen und vorhandene Evidenzverweise bewahren. Tiefe und Ergebniszahl sind begrenzt. Dies ist deterministische Graphtraversierung, keine neuronale Inferenz und kein Wahrheitsnachweis; die Funktion ist noch nicht mit der Browseroberfläche verbunden.
