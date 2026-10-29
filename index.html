@@ -258,12 +258,21 @@
                 showToast(`Node "${newNode.label}" added & persisted.`);
             };
 
-            const handleBulkIngest = (newNodes, newEdges) => {
-                const candidateNodes=[...nodes,...newNodes],candidateEdges=[...edges,...newEdges];
-                const validation=validateGraphData(candidateNodes,candidateEdges);
-                if(!validation.valid){showToast(`Import rejected: ${validation.errors.slice(0,2).join(' ')}`);return false;}
-                setNodes(candidateNodes);setEdges(candidateEdges);
-                showToast(`Imported ${newNodes.length} nodes and ${newEdges.length} edges.`);return true;
+            const handleBulkIngest = (newNodes, newEdges, mode = 'merge') => {
+                const candidateNodes = mode === 'replace' ? newNodes : [...nodes, ...newNodes];
+                const candidateEdges = mode === 'replace' ? newEdges : [...edges, ...newEdges];
+                const validation = validateGraphData(candidateNodes, candidateEdges);
+                if (!validation.valid) {
+                    showToast(`Import rejected: ${validation.errors.slice(0, 2).join(' ')}`);
+                    return false;
+                }
+                setNodes(candidateNodes);
+                setEdges(candidateEdges);
+                setSelectedNode(null);
+                showToast(mode === 'replace'
+                    ? `Replaced graph with ${newNodes.length} nodes and ${newEdges.length} edges.`
+                    : `Imported ${newNodes.length} nodes and ${newEdges.length} edges.`);
+                return true;
             };
 
             return (
@@ -1666,6 +1675,7 @@
         const IngestionModal = ({ onClose, onIngest, existingNodes = [], existingEdges = [] }) => {
             const [graphCategory, setGraphCategory] = useState('ckg'); // 'ckg', 'context', 'entity'
             const [format, setFormat] = useState('json'); // 'json', 'csv', 'cypher'
+            const [importMode, setImportMode] = useState('merge'); // 'merge' or 'replace'
             const [inputText, setInputText] = useState('');
             const [parsedPreview, setParsedPreview] = useState({ nodes: [], edges: [], error: null });
 
@@ -1813,10 +1823,15 @@
 
             const confirmIngestion = () => {
                 if (parsedPreview.error || parsedPreview.nodes.length === 0) return;
-                const validation=validateGraphData([...existingNodes,...parsedPreview.nodes],[...existingEdges,...parsedPreview.edges]);
-                if(!validation.valid){setParsedPreview(prev=>({...prev,error:validation.errors.slice(0,4).join(' ')}));return;}
-                const accepted=onIngest(parsedPreview.nodes,parsedPreview.edges);
-                if(accepted!==false)onClose();
+                const candidateNodes = importMode === 'replace' ? parsedPreview.nodes : [...existingNodes, ...parsedPreview.nodes];
+                const candidateEdges = importMode === 'replace' ? parsedPreview.edges : [...existingEdges, ...parsedPreview.edges];
+                const validation = validateGraphData(candidateNodes, candidateEdges);
+                if (!validation.valid) {
+                    setParsedPreview(prev => ({ ...prev, error: validation.errors.slice(0, 4).join(' ') }));
+                    return;
+                }
+                const accepted = onIngest(parsedPreview.nodes, parsedPreview.edges, importMode);
+                if (accepted !== false) onClose();
             };
 
             return (
@@ -1936,6 +1951,15 @@
                                     ))}
                                 </div>
                             )}
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-800 bg-slate-900/60 p-3">
+                            <label htmlFor="graph-import-mode" className="text-xs font-semibold text-slate-300">Import behavior</label>
+                            <select id="graph-import-mode" value={importMode} onChange={e => setImportMode(e.target.value)} className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200">
+                                <option value="merge">Merge into current graph</option>
+                                <option value="replace">Replace current graph</option>
+                            </select>
+                            {importMode === 'replace' && <span className="text-xs text-amber-300">Replaces the current graph only after the entire imported graph validates.</span>}
                         </div>
 
                         {/* Actions */}
