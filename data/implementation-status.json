@@ -8,7 +8,7 @@
     "unverified": "Configured or present, but the current runtime/deployment behavior has not been confirmed."
   },
   "features": [
-    {"id":"graph-archive","name":"Versioned graph archive","status":"implemented","evidence":["data/canonical/graph.json","schemas/graph.schema.json"],"notes":"Synthetic demonstration graph; not verified real-world facts."},
+    {"id":"graph-archive","name":"Versioned graph archive","status":"implemented","evidence":["data/canonical/graph.json","docs/graph-data-contract.md"],"notes":"Synthetic demonstration graph; not verified real-world facts."},
     {"id":"corpus-loader","name":"Graph, source, claim, evidence, and artifact corpus loader","status":"implemented","evidence":["src/neural-artifact-corpus.js","src/neural-artifact-validation.js"],"notes":"Validation establishes structure and references, not factual truth."},
     {"id":"bounded-traversal","name":"Bounded typed traversal and query API","status":"implemented","evidence":["src/neural-artifact-traversal.js","src/neural-artifact-query.js"],"notes":"Deterministic traversal, not semantic search or truth ranking."},
     {"id":"submission-preview","name":"JSON/JSONL submission validation preview","status":"implemented","evidence":["src/submission-contracts.js","src/submission-import.js"],"notes":"Dry-run only; no persistence or authorization."},
