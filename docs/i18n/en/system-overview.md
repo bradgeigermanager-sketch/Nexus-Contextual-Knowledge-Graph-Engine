@@ -30,3 +30,9 @@ For example, a collection could group a report, a topic, the connection between 
 The system is still being built. Some data checks, example records, schemas, and automated tests exist. A full visual editor for references and higher-level collections, automatic collection discovery, and real neural-network analysis are not yet complete. Examples marked synthetic are demonstrations, not proof of real-world facts.
 
 When reading results, keep three questions separate: What does the record say? What source or evidence supports it? How certain are we that the interpretation is correct? The system should preserve disagreements and uncertainty instead of hiding them.
+
+## New corpus-loading step
+
+The loader reads the graph, sources, claims, evidence links, artifacts, and artifact links together, validates their references, and builds lookup indexes. Missing files and broken references are reported rather than silently accepted. This is a data-loading and consistency feature, not a neural network that learns or proves facts.
+
+In simple terms: the system now has a reusable way to gather the connected records and check that their links point somewhere real before another part of the application uses them. The loader is not yet connected to the browser interface.
