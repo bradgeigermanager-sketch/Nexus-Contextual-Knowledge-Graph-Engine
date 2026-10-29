@@ -38,3 +38,7 @@ Secara sederhana, sistem kini memiliki cara yang dapat digunakan ulang untuk men
 ## Pembaruan pemuat korpus
 
 Pemuat kini menggabungkan catatan graf, sumber, klaim, bukti, dan artefak tingkat tinggi menjadi satu kumpulan yang divalidasi dengan indeks pencarian. Berkas yang hilang dan referensi rusak akan dilaporkan. Ini fitur konsistensi data, bukan jaringan saraf yang mempelajari atau membuktikan fakta; fitur ini belum terhubung ke antarmuka browser.
+
+## Pembaruan: penelusuran hubungan
+
+Kode kini memiliki penelusuran korpus berbatas yang dimulai dari referensi bertipe, seperti simpul, sisi, sumber, klaim, tautan bukti, atau artefak. Fitur ini mengembalikan rekaman yang dapat dijangkau beserta jalur yang mempertahankan jenis hubungan dan referensi bukti yang tersedia. Kedalaman dan jumlah hasil dibatasi. Ini adalah penelusuran graf deterministik, bukan inferensi jaringan saraf atau bukti kebenaran; fitur ini belum terhubung ke antarmuka browser.
