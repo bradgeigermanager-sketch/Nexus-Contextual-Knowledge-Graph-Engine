@@ -38,3 +38,7 @@ En termes simples, le système dispose désormais d’une méthode réutilisable
 ## Mise à jour du chargeur de corpus
 
 Le chargeur rassemble désormais les enregistrements du graphe, des sources, des affirmations, des preuves et des artefacts dans un ensemble vérifié avec des index de recherche. Il signale les fichiers manquants et les références rompues. C’est une fonction de cohérence des données, pas un réseau neuronal qui apprend ou prouve des faits ; elle n’est pas encore reliée à l’interface du navigateur.
+
+## Mise à jour : parcours des relations
+
+Le code comprend désormais un parcours limité du corpus à partir d’une référence typée, par exemple un nœud, une arête, une source, une affirmation, un lien de preuve ou un artefact. Il renvoie les enregistrements accessibles et des chemins qui conservent les types de relation et les références de preuve disponibles. La profondeur et le nombre de résultats sont plafonnés. Il s’agit d’un parcours déterministe du graphe, et non d’une inférence neuronale ni d’une preuve de vérité ; cette fonction n’est pas encore reliée à l’interface du navigateur.
