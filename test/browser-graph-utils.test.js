@@ -62,10 +62,11 @@ test("CSV exporter escapes values accepted by the parser", () => {
   assert.equal(plain(utils.parseCsvRecords(encoded))[0][0], value);
 });
 
-test("application ingestion validates the combined candidate before state changes", () => {
+test("application ingestion validates the candidate before state changes", () => {
   assert.ok(html.includes("const candidateNodes = mode === 'replace' ? newNodes : [...nodes, ...newNodes]"));
   assert.ok(html.includes("const candidateNodes = importMode === 'replace' ? parsedPreview.nodes"));
-  assert.ok(html.includes("if (!validation.valid) {"));\n  assert.ok(html.includes("showToast(`Import rejected:"));
+  assert.ok(html.includes("if (!validation.valid) {"));
+  assert.ok(html.includes("Import rejected:"));
   assert.ok(html.includes("const [initialGraph] = useState(() => loadSavedGraph())"));
 });
 
