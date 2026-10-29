@@ -27,3 +27,7 @@ Por ejemplo, un artefacto puede agrupar un informe, un tema, la relación entre 
 El sistema todavía está en desarrollo. Ya existen algunas comprobaciones de datos, ejemplos, esquemas y pruebas automáticas. El editor visual completo, el descubrimiento automático de grupos y el análisis con una red neuronal real aún no están terminados. Los ejemplos marcados como sintéticos son demostraciones, no pruebas de hechos reales.
 
 Para cada información, separe tres preguntas: ¿qué dice el registro?, ¿qué fuente lo respalda? y ¿cuánta confianza merece la interpretación? Las discrepancias y la incertidumbre deben mantenerse visibles.
+
+## Actualización del cargador del corpus
+
+El cargador reúne ahora los registros del grafo, las fuentes, las afirmaciones, las pruebas y los artefactos compuestos en un conjunto validado con índices de consulta. Informa de archivos ausentes y referencias no válidas. Es una función de coherencia de datos, no una red neuronal que aprende o demuestra hechos; todavía no está conectada a la interfaz del navegador.
