@@ -10,7 +10,8 @@ const modules = [
   "src/neural-artifact-traversal.js",
   "src/neural-artifact-query.js",
   "src/submission-contracts.js",
-  "src/submission-import.js"
+  "src/submission-import.js",
+  "src/submission-staging.js"
 ];
 
 function copy(source, destination) {
@@ -38,6 +39,7 @@ function buildBrowserBundle() {
       const normalized = request.replace(/\\.js$/, "");
       if (normalized === "./neural-artifact-traversal") return load("./neural-artifact-traversal");
       if (normalized === "./submission-contracts") return load("./submission-contracts");
+      if (normalized === "./submission-import") return load("./submission-import");
       throw new Error("Unsupported bundled dependency: " + request);
     };
     const bufferShim = { byteLength: function(value) { return new TextEncoder().encode(value).length; } };
@@ -49,7 +51,8 @@ function buildBrowserBundle() {
     traverseNeuralArtifactCorpus: load("./neural-artifact-traversal").traverseNeuralArtifactCorpus,
     normalizeSubmission: load("./submission-contracts").normalizeSubmission,
     validateQueryEnvelope: load("./submission-contracts").validateQueryEnvelope,
-    parseSubmissionText: load("./submission-import").parseSubmissionText
+    parseSubmissionText: load("./submission-import").parseSubmissionText,
+    stageSubmissionText: load("./submission-staging").stageSubmissionText
   });
 })(typeof window !== "undefined" ? window : globalThis);
 `;
