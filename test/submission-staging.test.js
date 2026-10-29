@@ -19,7 +19,8 @@ test("staging preserves provenance and fingerprints candidate without persistenc
   assert.equal(result.records.length, 1);
   assert.equal(result.records[0].classification, "ready_for_review");
   assert.equal(result.records[0].provenance.sourceRef, "source:source-example-report-page");
-  assert.equal(result.records[0].fingerprint.algorithm, "sha256");
+  assert.equal(result.records[0].fingerprint.algorithm, "fnv1a-32");
+  assert.match(result.records[0].fingerprint.value, /^[a-f0-9]{8}$/);
   assert.equal(result.records[0].committed, false);
   assert.equal(result.committed, false);
 });
