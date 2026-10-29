@@ -48,7 +48,7 @@ test("generated browser bundle parses and exposes shared query and submission AP
 
 test("portal inline JavaScript parses before publication", () => {
   const html = fs.readFileSync(path.join(__dirname, "../site/portal.html"), "utf8");
-  const scripts = [...html.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/gi)].map(match => match[1]).filter(source => source.trim());
+  const scripts = html.split("<script>").slice(1).map(block => block.split("</script>")[0]).filter(source => source.trim());
   assert.ok(scripts.length > 0, "expected inline portal script");
   for (const source of scripts) new vm.Script(source, { filename: "site/portal.html:inline-script" });
 });
