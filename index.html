@@ -168,10 +168,10 @@
         };
         const parseCsvRecords = text => {
             const rows=[];let row=[],field='',quoted=false;
-            for(let i=0;i<text.length;i++){const ch=text[i];if(quoted){if(ch==='"'&&text[i+1]==='"'){field+='"';i++;}else if(ch==='"')quoted=false;else field+=ch;}else if(ch==='"'&&field==='')quoted=true;else if(ch===','){row.push(field);field='';}else if(ch==='\\n'||ch==='\\r'){if(ch==='\\r'&&text[i+1]==='\\n')i++;row.push(field);rows.push(row);row=[];field='';}else field+=ch;}
+            for(let i=0;i<text.length;i++){const ch=text[i];if(quoted){if(ch==='"'&&text[i+1]==='"'){field+='"';i++;}else if(ch==='"')quoted=false;else field+=ch;}else if(ch==='"'&&field==='')quoted=true;else if(ch===','){row.push(field);field='';}else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&text[i+1]==='\n')i++;row.push(field);rows.push(row);row=[];field='';}else field+=ch;}
             if(quoted)throw Error('CSV contains an unterminated quoted field.');if(field.length||row.length){row.push(field);rows.push(row);}return rows.filter(r=>r.some(v=>v.trim()!==''));
         };
-        const csvField = value => {const v=value==null?'':String(value);return /[",\\r\\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
+        const csvField = value => {const v=value==null?'':String(value);return /[",\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
         const loadSavedGraph = () => {try{const rn=localStorage.getItem('nexus_ckg_nodes'),re=localStorage.getItem('nexus_ckg_edges');const nodes=rn?JSON.parse(rn):INITIAL_NODES,edges=re?JSON.parse(re):INITIAL_EDGES;const v=validateGraphData(nodes,edges);if(!v.valid)throw Error(v.errors.join(' '));return {nodes,edges};}catch(error){console.warn('Saved graph invalid; using seed data.',error);return {nodes:INITIAL_NODES,edges:INITIAL_EDGES};}};
 
         // --- MAIN APP COMPONENT ---
@@ -1729,7 +1729,7 @@
                             weight: e.weight || 0.8
                         }));
                     } else if (format === 'csv') {
-                        const marker=/(?:^|\\r?\\n)---edges---(?:\\r?\\n|$)/,match=marker.exec(inputText);
+                        const marker=/(?:^|\r?\n)---edges---(?:\r?\n|$)/,match=marker.exec(inputText);
                         if(!match)throw Error('CSV must contain a ---edges--- separator between nodes and edges.');
                         const nr=parseCsvRecords(inputText.slice(0,match.index).trim()),er=parseCsvRecords(inputText.slice(match.index+match[0].length).trim());
                         const nh=(nr.shift()||[]).map(v=>v.trim().toLowerCase()),eh=(er.shift()||[]).map(v=>v.trim().toLowerCase());
@@ -1975,9 +1975,9 @@
                     return JSON.stringify(payload, null, 2);
                 } else if (exportFormat === 'csv') {
                     const nf=['id','label','type','val','color','desc','metrics_json'],ef=['id','source','target','label','weight'];
-                    const nc=[nf.map(csvField).join(','),...targetNodes.map(n=>nf.map(k=>csvField(k==='metrics_json'?JSON.stringify(n.metrics||{}):n[k])).join(','))].join('\\n');
-                    const ec=[ef.map(csvField).join(','),...targetEdges.map(e=>ef.map(k=>csvField(e[k])).join(','))].join('\\n');
-                    return nc+'\\n---edges---\\n'+ec+'\\n';
+                    const nc=[nf.map(csvField).join(','),...targetNodes.map(n=>nf.map(k=>csvField(k==='metrics_json'?JSON.stringify(n.metrics||{}):n[k])).join(','))].join('\n');
+                    const ec=[ef.map(csvField).join(','),...targetEdges.map(e=>ef.map(k=>csvField(e[k])).join(','))].join('\n');
+                    return nc+'\n---edges---\n'+ec+'\n';
                 } else if (exportFormat === 'cypher') {
                     let cypher = `// Nexus CKG Export Script - Target: ${exportScope.toUpperCase()}\n`;
                     targetNodes.forEach(n => {
