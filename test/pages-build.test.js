@@ -14,6 +14,8 @@ test("generated browser bundle parses and exposes shared query and submission AP
   assert.equal(typeof context.NexusModules.queryNeuralArtifactCorpus, "function");
   assert.equal(typeof context.NexusModules.parseSubmissionText, "function");
   assert.equal(typeof context.NexusModules.stageSubmissionText, "function");
+  assert.equal(typeof context.NexusModules.summarizeStagingForReview, "function");
+  assert.equal(typeof context.NexusModules.validateReviewDecision, "function");
   const corpus = loadNeuralArtifactCorpus({ rootDir: path.join(__dirname, "..") });
   const browserCorpus = { valid: corpus.valid, data: corpus.data, indexes: {} };
   const query = context.NexusModules.queryNeuralArtifactCorpus(browserCorpus, {
@@ -37,4 +39,8 @@ test("generated browser bundle parses and exposes shared query and submission AP
   const staged = context.NexusModules.stageSubmissionText(JSON.stringify(envelope), browserCorpus);
   assert.equal(staged.records[0].classification, "ready_for_review");
   assert.equal(staged.committed, false);
+  const reviewSummary = context.NexusModules.summarizeStagingForReview(staged);
+  assert.equal(reviewSummary.counts.ready_for_review, 1);
+  const decision = { schema: "nexus-review-decision/v1", decisionId: "review-bundle-1", submissionId: staged.records[0].submissionId, candidateFingerprint: staged.records[0].fingerprint, corpusSnapshotId: "fixture-snapshot-1", reviewer: { subject: "test:reviewer" }, decidedAt: "2026-10-28T19:00:00Z", decision: "accept", rationale: "Automated bundle contract test." };
+  assert.equal(context.NexusModules.validateReviewDecision(decision, staged.records[0], "fixture-snapshot-1").valid, true);
 });
