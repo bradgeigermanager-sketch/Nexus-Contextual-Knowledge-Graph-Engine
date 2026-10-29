@@ -1968,9 +1968,9 @@
                         targetType: exportScope,
                         exportedAt: new Date().toISOString(),
                         nodes: targetNodes.map(n => {
-                            const nodeObj = { id: n.id, label: n.label, type: n.type, desc: n.desc };
-                            if (incMetadata) nodeObj.metrics = n.metrics;
-                            if (incEmbeddings) nodeObj.vectorDimensions = 1536;
+                            const nodeObj = { ...n };
+                            if (!incMetadata) delete nodeObj.metrics;
+                            if (!incEmbeddings) delete nodeObj.vectorDimensions;
                             return nodeObj;
                         }),
                         edges: targetEdges
