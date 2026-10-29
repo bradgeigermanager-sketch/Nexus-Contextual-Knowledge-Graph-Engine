@@ -1744,7 +1744,7 @@
                         newEdges=er.map((row,i)=>({id:ei.id!==undefined&&row[ei.id]?.trim()?row[ei.id].trim():`csv_e_${i}`,source:row[ei.source]?.trim(),target:row[ei.target]?.trim(),label:row[ei.label]?.trim()||'relates',weight:row[ei.weight]===''||row[ei.weight]===undefined?0.8:Number(row[ei.weight])}));
                     } else if (format === 'cypher') {
                         // Supported subset: CREATE nodes with property maps and directed relationships.
-                        const nodeMatches = [...inputText.matchAll(/CREATE\s*\(([^:]+):?([^\s{]*)\s*\{([^}]+)\}\)/gi)];
+                        const nodeMatches = [...inputText.matchAll(/CREATE\s*\(([^:]*):?([^\s{]*)\s*\{([^}]+)\}\)/gi)];
                         const colorMap = { ckg: '#38bdf8', entity: '#10b981', context: '#6366f1', temporal: '#a855f7', spatial: '#f59e0b', topical: '#ec4899' };
                         const variableToId = new Map();
                         const quotedPatterns = {
