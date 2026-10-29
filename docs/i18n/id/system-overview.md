@@ -33,3 +33,8 @@ Untuk setiap informasi, pisahkan tiga pertanyaan: apa yang tertulis, sumber apa 
 Pemuat membaca graf, sumber, klaim, tautan bukti, artefak, dan tautan antarartefak secara bersamaan, lalu memeriksa referensinya dan membuat indeks pencarian. Berkas yang hilang dan referensi yang rusak dilaporkan, bukan diterima begitu saja. Ini adalah fitur pemuatan dan pemeriksaan konsistensi data, bukan jaringan saraf yang mempelajari atau membuktikan fakta.
 
 Secara sederhana, sistem kini memiliki cara yang dapat digunakan ulang untuk mengumpulkan catatan yang saling terhubung dan memeriksa apakah tautannya mengarah ke catatan yang benar-benar ada sebelum bagian aplikasi lain menggunakannya. Pemuat ini belum terhubung ke antarmuka browser.
+
+
+## Pembaruan pemuat korpus
+
+Pemuat kini menggabungkan catatan graf, sumber, klaim, bukti, dan artefak tingkat tinggi menjadi satu kumpulan yang divalidasi dengan indeks pencarian. Berkas yang hilang dan referensi rusak akan dilaporkan. Ini fitur konsistensi data, bukan jaringan saraf yang mempelajari atau membuktikan fakta; fitur ini belum terhubung ke antarmuka browser.
