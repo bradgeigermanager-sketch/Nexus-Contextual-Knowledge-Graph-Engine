@@ -33,3 +33,8 @@ Kwa kila taarifa, tenga maswali matatu: rekodi inasema nini, ni chanzo gani kina
 Kipakiaji husoma grafu, vyanzo, madai, viungo vya ushahidi, vizalia na viungo kati ya vizalia kwa pamoja, kisha hukagua marejeo na kuunda faharasa za kutafuta. Faili zinazokosekana na marejeo yaliyovunjika huripotiwa badala ya kukubaliwa kimyakimya. Hii ni kazi ya kupakia data na kukagua ulinganifu wake, si mtandao wa neva unaojifunza au kuthibitisha ukweli.
 
 Kwa lugha rahisi, mfumo sasa una njia inayoweza kutumiwa tena kukusanya rekodi zilizounganishwa na kuangalia kama viungo vyake vinaelekeza kwenye rekodi zilizopo kabla sehemu nyingine ya programu haijazitumia. Kipakiaji bado hakijaunganishwa na kiolesura cha kivinjari.
+
+
+## Sasisho la kipakiaji cha mkusanyiko
+
+Kipakiaji sasa hukusanya rekodi za grafu, vyanzo, madai, ushahidi na vizalia vya ngazi ya juu katika mkusanyiko mmoja uliokaguliwa wenye faharasa za kutafuta. Faili zinazokosekana na marejeo yaliyovunjika huripotiwa. Hii ni kazi ya ulinganifu wa data, si mtandao wa neva unaojifunza au kuthibitisha ukweli; bado haijaunganishwa na kiolesura cha kivinjari.
