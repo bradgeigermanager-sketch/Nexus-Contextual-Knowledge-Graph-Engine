@@ -1,5 +1,6 @@
 "use strict";
 const test = require("node:test");
+const fs = require("node:fs");
 const assert = require("node:assert/strict");
 const vm = require("node:vm");
 const path = require("node:path");
@@ -43,4 +44,11 @@ test("generated browser bundle parses and exposes shared query and submission AP
   assert.equal(reviewSummary.counts.ready_for_review, 1);
   const decision = { schema: "nexus-review-decision/v1", decisionId: "review-bundle-1", submissionId: staged.records[0].submissionId, candidateFingerprint: staged.records[0].fingerprint, corpusSnapshotId: "fixture-snapshot-1", reviewer: { subject: "test:reviewer" }, decidedAt: "2026-10-28T19:00:00Z", decision: "accept", rationale: "Automated bundle contract test." };
   assert.equal(context.NexusModules.validateReviewDecision(decision, staged.records[0], "fixture-snapshot-1").valid, true);
+});
+
+test("portal inline JavaScript parses before publication", () => {
+  const html = fs.readFileSync(path.join(__dirname, "../site/portal.html"), "utf8");
+  const scripts = [...html.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/gi)].map(match => match[1]).filter(source => source.trim());
+  assert.ok(scripts.length > 0, "expected inline portal script");
+  for (const source of scripts) new vm.Script(source, { filename: "site/portal.html:inline-script" });
 });
