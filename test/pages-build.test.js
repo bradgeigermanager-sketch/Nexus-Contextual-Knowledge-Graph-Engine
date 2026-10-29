@@ -13,6 +13,7 @@ test("generated browser bundle parses and exposes shared query and submission AP
   vm.runInNewContext(buildBrowserBundle(), context, { timeout: 2000 });
   assert.equal(typeof context.NexusModules.queryNeuralArtifactCorpus, "function");
   assert.equal(typeof context.NexusModules.parseSubmissionText, "function");
+  assert.equal(typeof context.NexusModules.stageSubmissionText, "function");
   const corpus = loadNeuralArtifactCorpus({ rootDir: path.join(__dirname, "..") });
   const browserCorpus = { valid: corpus.valid, data: corpus.data, indexes: {} };
   const query = context.NexusModules.queryNeuralArtifactCorpus(browserCorpus, {
@@ -33,4 +34,7 @@ test("generated browser bundle parses and exposes shared query and submission AP
   const imported = context.NexusModules.parseSubmissionText(JSON.stringify(envelope));
   assert.equal(imported.valid, true, JSON.stringify(imported.errors));
   assert.equal(imported.committed, false);
+  const staged = context.NexusModules.stageSubmissionText(JSON.stringify(envelope), browserCorpus);
+  assert.equal(staged.records[0].classification, "ready_for_review");
+  assert.equal(staged.committed, false);
 });
