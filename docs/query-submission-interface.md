@@ -10,7 +10,7 @@ This layer gives humans, scripts, agents, and external systems a stable contract
 - Submission ingress: canonical JSON and JSONL first; future adapters may support CSV/TSV, JSON-LD, RDF, GraphML/GEXF, database connectors, and archive bundles.
 - Output egress: typed JSON is the control format; JSONL supports streams; CSV suits flat projections; GraphML is graph-oriented and may not preserve all provenance or domain metadata.
 
-A format named in this plan is not a claim that its adapter exists. The schemas and normalizer define contracts and guardrails, not live endpoints or complete third-party language parsers.
+A format named in this plan is not a claim that its adapter exists. The schemas, normalizer, and JSON/JSONL reader define contracts and guardrails, not live endpoints or complete third-party language parsers.
 
 ## Canonical query envelope
 
@@ -37,7 +37,7 @@ Recommended lifecycle for a future persistence service:
 7. Return a preview plus a machine-readable validation report.
 8. Stage for review; commit only through a separately authorized persistence path.
 
-src/submission-contracts.js currently performs local shape checks and normalization only. It does not authenticate callers, resolve graph references, detect corpus conflicts, write to the graph, or commit records. Setting dryRun=false does not enable persistence; normalized output remains dry-run and includes a warning.
+src/submission-contracts.js performs local shape checks and normalization. src/submission-import.js implements bounded JSON and JSONL parsing, per-record validation reports, and dry-run-only results. It does not authenticate callers, resolve graph references, detect corpus conflicts, write to the graph, or commit records. Setting dryRun=false does not enable persistence; normalized output remains dry-run and includes a warning.
 
 Submission result states are designed to distinguish received, invalid, staged, needs_review, committed, rejected, and duplicate. The contract describes these states but does not implement a workflow engine.
 
@@ -59,7 +59,7 @@ schemas/adapter-manifest.schema.json describes adapter ID/version, direction, fo
 ## Next implementation steps
 
 1. Add a pinned JSON Schema validator with draft 2020-12 support in CI.
-2. Implement JSON/JSONL parser adapters and CSV mapping profiles with lossiness reports.
+2. Implement CSV/TSV mapping profiles with explicit lossiness reports.
 3. Add corpus-snapshot reference resolution and duplicate/conflict reports.
 4. Add alternative-path discovery and relationship comparison to the query engine.
 5. Design authenticated API routes and a review/staging UI after these contracts stabilize.
