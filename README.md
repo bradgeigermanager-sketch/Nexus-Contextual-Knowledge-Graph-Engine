@@ -33,11 +33,12 @@ The repository uses Node.js built-in tests and GitHub Actions to check graph str
 - `src/neural-artifact-traversal.js`: bounded typed traversal from nodes, edges, sources, claims, evidence links, or artifacts; returns paths that preserve relationship and provenance metadata.
 - `src/neural-artifact-query.js`: typed start/target queries and post-traversal filters for record types, artifact types, statuses, contexts, and relationships.
 - `src/submission-contracts.js`: local shape checks for canonical query envelopes and node/edge/source/claim-evidence submission envelopes; no persistence or authorization.
+- `src/submission-import.js`: bounded JSON and JSONL parsing into validated submission envelopes, with per-record errors and dry-run-only results.
 - `schemas/query-envelope.schema.json` and the `*-submission.schema.json` files: versioned JSON contracts for queries and typed record submissions.
 - `schemas/adapter-manifest.schema.json`, `schemas/validation-report.schema.json`, and `schemas/submission-result.schema.json`: adapter capability, validation, and staging-result contracts.
 - `test/neural-artifact-corpus.test.js`, `test/neural-artifact-traversal.test.js`, and `test/neural-artifact-query.test.js`: loader, traversal, and query tests.
 
-The query/submission layer currently defines canonical JSON contracts and a local normalizer; it is not yet a REST API, UI, import parser, corpus-reference resolver, or persistence service. The orchestration catalog is declarative groundwork, not a connected LangChain runtime. Construct examples are synthetic and execution-disabled. Traversal and queries are deterministic graph exploration, not a trained neural network, semantic search engine, or truth-ranking system. Query filters are currently applied after bounded traversal, and only one shortest discovered path per reached reference is returned. The browser UI is not yet wired to the loader, traversal, or query API.
+The query/submission layer currently defines canonical JSON contracts, local envelope validation, and bounded JSON/JSONL import. It is not yet a REST API, UI, CSV/RDF/GraphML parser, corpus-reference resolver, or persistence service. The orchestration catalog is declarative groundwork, not a connected LangChain runtime. Construct examples are synthetic and execution-disabled. Traversal and queries are deterministic graph exploration, not a trained neural network, semantic search engine, or truth-ranking system. Query filters are currently applied after bounded traversal, and only one shortest discovered path per reached reference is returned. The browser UI is not yet wired to the loader, traversal, or query API.
 
 ## Multilingual system documentation
 
