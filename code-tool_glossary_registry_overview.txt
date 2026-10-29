@@ -1,0 +1,282 @@
+好，这一步是从「单个工具 glossary」走向「仓库级 / 平台级资产」。
+
+下面给你一套可落地的「Code-Tool Glossary Registry」设计与最小实现：
+能存、能查、能给模型用、能给 Runtime 做护栏、能和 Skill Manifest 对齐。
+
+一、Registry 的定位
+
+Glossary Registry = 代码工具语义层的中枢
+
+它不等于：
+- 文档站
+- 向量库
+- API 文档生成器
+
+它是：
+
+code tools ──▶ glossary entries ──▶ registry ──▶ model / runtime / policy
+
+二、核心数据模型（先定“词元”，再定“工具”）
+
+1. Term（最小单元）
+
+class TermType(str, Enum):
+    IDENTIFIER = "identifier"
+    SCALAR = "scalar"
+    ENUM = "enum"
+    FREE_TEXT = "free_text"
+    CONTROL_FLAG = "control_flag"
+    SECRET = "secret"
+    COMPUTED = "computed"
+    SIDE_EFFECT = "side_effect"
+
+class Term:
+    term: str                  # "amount"
+    type: TermType
+    domain: str                # "payments.refund"
+    definition: str             # 领域化定义
+    unit: str | None            # "minor_currency_unit"
+    allowed_values: list[str] | None
+    invariants: list[str]
+    code_refs: list[str]        # ["refund.py:42"]
+    relates_to: list[Relation]
+    guard: str | None           # requires_human_approval / never_expose
+    source_tool: str
+
+2. Relation
+
+class RelationType(str, Enum):
+    IS_A = "is_a"
+    PART_OF = "part_of"
+    USES = "uses"
+    TRIGGERS = "triggers"
+    BOUNDED_BY = "bounded_by"
+    MAPS_TO_TOOL = "maps_to_tool"
+    CONFLICTS_WITH = "conflicts_with"
+
+class Relation:
+    target: str
+    type: RelationType
+    note: str | None
+
+3. ToolGlossary
+
+class ToolGlossary:
+    tool_id: str               # refund_payment
+    layer: str = "L1_tool"
+    domain: str
+    summary: str
+    terms: list[Term]
+    meta_rules: list[str]
+    side_effects: list[str]
+    secrets: list[str]
+    model_hints: dict          # say / never
+
+4. Registry（总表）
+
+class GlossaryRegistry:
+    tools: dict[str, ToolGlossary]
+    terms: dict[str, list[Term]]   # term_name -> usages
+    domains: dict[str, list[str]]  # domain -> tool_ids
+
+三、存储形态（不一定要数据库）
+
+✅ 推荐：文件系统即数据库
+
+glossary-registry/
+  index.json
+  domains/
+    payments.refund.json
+    orders.cancel.json
+  tools/
+    refund_payment.json
+    cancel_order.json
+  terms/
+    amount.json
+    order_id.json
+    force.json
+
+index.json
+
+{
+  "tools": ["refund_payment", "cancel_order"],
+  "domains": {
+    "payments.refund": ["refund_payment"],
+    "orders": ["cancel_order"]
+  },
+  "global_terms": ["amount", "order_id", "force"]
+}
+
+四、Registry 的核心操作（API 形状）
+
+registry = GlossaryRegistry.load("glossary-registry")
+
+1. 查工具 glossary
+g = registry.get_tool("refund_payment")
+
+2. 查跨工具术语
+registry.get_term("amount")
+
+=> [payments.refund / minor_currency_unit, billing.invoice / decimal]
+
+3. 查高危控制项
+registry.guarded_terms(guard="requires_human_approval")
+
+=> force, override_risk, admin_refund
+
+4. 查某 domain 的全部不变式
+registry.domain_rules("payments.refund")
+
+5. 给模型用的视图
+registry.model_view(tool="refund_payment")
+
+五、Model View（关键：别把 Registry 全给 LLM）
+
+def model_view(tool_id: str) -> dict:
+    g = registry.get_tool(tool_id)
+    return {
+        "tool": tool_id,
+        "summary": g.summary,
+        "terms": [
+            {
+              "term": t.term,
+              "type": t.type,
+              "definition": t.definition,
+              "invariants": t.invariants,
+            }
+            for t in g.terms
+            if t.guard != "never_expose"
+        ],
+        "say": g.model_hints.get("say", []),
+        "never": g.model_hints.get("never", [])
+    }
+
+➡️ Runtime 看全量，Model 看裁剪版
+
+六、怎么把工具“注册”进去（Pipeline）
+
+Python tool / MCP tool
+   ↓
+ast + type hints + docstring
+   ↓
+extract_terms()
+   ↓
+llm_enrich()      # 写领域定义 / invariants
+   ↓
+validate_terms()  # 类型 / guard / code_ref 必须存在
+   ↓
+registry.upsert(tool_glossary)
+
+伪代码
+
+def register_tool(func) -> None:
+    g = build_glossary_for_code_tool(func)
+    registry.upsert(g)
+    registry.reindex_term("amount")
+    registry.write(f"tools/{g.tool_id}.json")
+
+七、和 Skill Manifest 的对接方式
+
+skill.yaml
+uses_tools:
+  - refund_payment
+glossary_ref: glossary-registry/tools/refund_payment.json
+
+Skill 加载时：
+
+glossary = registry.get_tool("refund_payment")
+inject_into_prompt(glossary.model_view())
+
+效果：
+- 模型知道 amount 是“分”
+- 模型知道 force=True 不能自己决定
+- 新人读 glossary.json 比读源码快
+
+八、Registry 能支撑的高级能力
+
+✅ 跨工具消歧
+amount in refund ≠ amount in invoice
+
+✅ 自动护栏
+任何 tool 用 force / admin / dry_run → 必须 policy 层确认
+
+✅ Impact glossary
+改 captured_amount → 影响 refund_payment, settle_order
+
+✅ Nexus / GitNexus 对齐
+code graph node  ── maps_to ──▶ glossary term
+calls edge       ── maps_to ──▶ triggers relation
+
+九、最小可用 Python 实现（骨架）
+
+import json, pathlib
+
+class GlossaryRegistry:
+    def __init__(self, root: str):
+        self.root = pathlib.Path(root)
+        self.index = json.loads((self.root/"index.json").read_text())
+
+    def get_tool(self, tool_id: str) -> dict:
+        return json.loads((self.root/f"tools/{tool_id}.json").read_text())
+
+    def get_term(self, term: str) -> list[dict]:
+        p = self.root/f"terms/{term}.json"
+        return json.loads(p.read_text()) if p.exists() else []
+
+    def guarded_terms(self, guard: str):
+        out = []
+        for t in self.index["global_terms"]:
+            for entry in self.get_term(t):
+                if entry.get("guard") == guard:
+                    out.append(entry)
+        return out
+
+    def model_view(self, tool_id: str) -> dict:
+        g = self.get_tool(tool_id)
+        return {
+            "tool": tool_id,
+            "summary": g["summary"],
+            "terms": [
+                {"term": t["term"], "definition": t["definition"]}
+                for t in g["terms"]
+                if t.get("guard") != "never_expose"
+            ],
+        }
+
+十、Registry 的“治理规则”（很重要）
+
+Registry 不是自由文本池，要有铁律：
+
+1. 每个 term 必须有 code_ref
+2. 每个 control_flag 必须有 guard
+3. 每个 secret 必须 never_expose
+4. 同 domain 内 term 语义必须一致
+5. tool 删除 → glossary 标记 deprecated，不物理删
+6. model_view 永远由 Registry 生成，不让 prompt 直接拼
+
+十一、演进路线
+
+v0  手写 glossary json
+v1  Python AST 抽取 param/return
+v2  LLM 补 definition / invariants
+v3  Registry + Skill Manifest 联动
+v4  Code graph (Nexus) ↔ Glossary graph
+v5  模型调用前先 query glossary（RAG/MCP）
+
+十二、MCP 视角（可选但很香）
+
+tools:
+  glossary_lookup(term)
+  tool_glossary(tool_id)
+  domain_rules(domain)
+  guarded_terms(guard)
+
+Agent 在规划时：
+“我要用 refund_payment → 先查 glossary → 发现 force 要审批”
+
+
+1. ✅ build_glossary_for_code_tool(func) 完整实现
+2. ✅ AST + docstring + Pydantic → ToolGlossary
+3. ✅ Skill Manifest ↔ Glossary Registry 自动绑定
+4. ✅ Nexus/GitNexus 图节点 ↔ glossary term 映射 schema
+5. ✅ MCP server: glossary registry
