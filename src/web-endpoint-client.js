@@ -64,9 +64,22 @@ async function requestEndpoint(profile, options = {}) {
     const response = await fetch(url, { method, headers, body, signal: controller.signal, redirect: "error" });
     const declaredLength = Number(response.headers.get("content-length"));
     if (Number.isFinite(declaredLength) && declaredLength > profile.limits.maxResponseBytes) return { ok: false, status: response.status, error: { code: "endpoint.response_too_large", message: "Response exceeds configured size limit." } };
-    const bytes = Buffer.from(await response.arrayBuffer());
-    if (bytes.byteLength > profile.limits.maxResponseBytes) return { ok: false, status: response.status, error: { code: "endpoint.response_too_large", message: "Response exceeds configured size limit." } };
-    const text = bytes.toString("utf8");
+    const chunks = [];
+    let totalBytes = 0;
+    if (response.body) {
+      const reader = response.body.getReader();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        totalBytes += value.byteLength;
+        if (totalBytes > profile.limits.maxResponseBytes) {
+          await reader.cancel();
+          return { ok: false, status: response.status, error: { code: "endpoint.response_too_large", message: "Response exceeds configured size limit." } };
+        }
+        chunks.push(Buffer.from(value));
+      }
+    }
+    const text = Buffer.concat(chunks, totalBytes).toString("utf8");
     let data = text;
     if (profile.responseFormat === "json" || profile.responseFormat === "sparql-json") {
       try { data = JSON.parse(text); }
