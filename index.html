@@ -1,0 +1,2159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus CKG Engine - Contextual Knowledge Graph Explorer</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel standalone -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            850: '#0f172a',
+                            900: '#0b0f19',
+                            950: '#05070e',
+                        },
+                        cyan: {
+                            400: '#22d3ee',
+                            500: '#06b6d4',
+                        },
+                        purple: {
+                            500: '#a855f7',
+                            600: '#9333ea',
+                        }
+                    },
+                    animation: {
+                        'pulse-glow': 'pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        pulseGlow: {
+                            '0%, 100%': { opacity: 1, filter: 'drop-shadow(0 0 10px rgba(34,211,238,0.6))' },
+                            '50%': { opacity: 0.7, filter: 'drop-shadow(0 0 2px rgba(34,211,238,0.2))' }
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-8px)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #05070e;
+            color: #e2e8f0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        /* Glassmorphism utility */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 12px 32px 0 rgba(0, 0, 0, 0.45);
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(56, 189, 248, 0.3);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.15);
+        }
+
+        .neon-glow {
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.4), 0 0 30px rgba(168, 85, 247, 0.2);
+        }
+
+        /* High Contrast mode styles */
+        .high-contrast {
+            background-color: #000000 !important;
+            color: #ffffff !important;
+        }
+        .high-contrast .glass-panel, 
+        .high-contrast .glass-card {
+            background: #000000 !important;
+            border: 2px solid #ffffff !important;
+            box-shadow: none !important;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+<body className="bg-slate-950 text-slate-100 antialiased selection:bg-cyan-500 selection:text-black">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useMemo, useCallback } = React;
+
+        // --- MOCK SEED DATA FOR CKG ---
+        const INITIAL_NODES = [
+            { id: 'n1', label: 'User Query', type: 'entity', val: 20, color: '#10b981', desc: 'Active user query payload seeking quarterly performance analysis', metrics: { latency: '12ms', weight: 0.95 } },
+            { id: 'n2', label: 'Financial Report', type: 'ckg', val: 26, color: '#38bdf8', desc: 'Core Contextual Knowledge Graph entity representing SEC 10-Q filings', metrics: { confidence: '98%', vectorDim: 1536 } },
+            { id: 'n3', label: 'Q3 2026', type: 'temporal', val: 18, color: '#a855f7', desc: 'Temporal constraint filter set to current fiscal quarter', metrics: { timeframe: 'Q3-2026', scope: 'Exact' } },
+            { id: 'n4', label: 'North America', type: 'spatial', val: 18, color: '#f59e0b', desc: 'Geographic entity bound to regional operational centers', metrics: { lat: 37.77, lon: -122.41 } },
+            { id: 'n5', label: 'Revenue Growth', type: 'topical', val: 22, color: '#ec4899', desc: 'Topical domain topic vector for fiscal expansion and margins', metrics: { relevance: 0.92, status: 'Active' } },
+            { id: 'n6', label: 'AI Market Trend', type: 'ckg', val: 20, color: '#38bdf8', desc: 'Macroeconomic market trends generated from LLM extractions', metrics: { cluster: 'Technology/AI', density: 0.84 } },
+            { id: 'n7', label: 'Regulatory Policy', type: 'context', val: 18, color: '#6366f1', desc: 'Compliance & Governance restriction layers', metrics: { complianceLevel: 'Tier-1 High Risk' } },
+            { id: 'n8', label: 'Executive Briefing', type: 'entity', val: 16, color: '#10b981', desc: 'Generated synthesis document target for RAG retrieval', metrics: { status: 'Drafting', topK: 5 } },
+        ];
+
+        const INITIAL_EDGES = [
+            { id: 'e1', source: 'n1', target: 'n2', label: 'references', weight: 0.9 },
+            { id: 'e2', source: 'n2', target: 'n3', label: 'temporal_scope', weight: 0.8 },
+            { id: 'e3', source: 'n2', target: 'n4', label: 'spatial_bound', weight: 0.85 },
+            { id: 'e4', source: 'n2', target: 'n5', label: 'has_topic', weight: 0.95 },
+            { id: 'e5', source: 'n5', target: 'n6', label: 'correlated_with', weight: 0.75 },
+            { id: 'e6', source: 'n1', target: 'n7', label: 'constrained_by', weight: 0.88 },
+            { id: 'e7', source: 'n6', target: 'n4', label: 'regional_impact', weight: 0.7 },
+            { id: 'e8', source: 'n2', target: 'n8', label: 'synthesizes_into', weight: 0.92 }
+        ];
+
+        // Default Config settings
+        const DEFAULT_CONFIG = {
+            embeddingModel: 'text-embedding-3-large',
+            topK: 10,
+            cosineThreshold: 0.78,
+            fusionAlpha: 0.65,
+            enableCache: true,
+            maxContextTokens: 8192,
+            ragStrategy: 'hybrid-vector-graph'
+        };
+
+        // --- MAIN APP COMPONENT ---
+        const App = () => {
+            const [activeModule, setActiveModule] = useState('explorer');
+            const [highContrast, setHighContrast] = useState(false);
+            
+            // Persistent Nodes & Edges via Local Storage
+            const [nodes, setNodes] = useState(() => {
+                const saved = localStorage.getItem('nexus_ckg_nodes');
+                return saved ? JSON.parse(saved) : INITIAL_NODES;
+            });
+            const [edges, setEdges] = useState(() => {
+                const saved = localStorage.getItem('nexus_ckg_edges');
+                return saved ? JSON.parse(saved) : INITIAL_EDGES;
+            });
+
+            const [selectedNode, setSelectedNode] = useState(null);
+            const [searchQuery, setSearchQuery] = useState('');
+            const [filterType, setFilterType] = useState('all');
+            const [config, setConfig] = useState(() => {
+                const saved = localStorage.getItem('nexus_ckg_config');
+                return saved ? JSON.parse(saved) : DEFAULT_CONFIG;
+            });
+            const [toastMessage, setToastMessage] = useState(null);
+            const [isNodeModalOpen, setIsNodeModalOpen] = useState(false);
+            const [isIngestModalOpen, setIsIngestModalOpen] = useState(false);
+            const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+
+            // Context dimensions state
+            const [contexts, setContexts] = useState([
+                { id: 'temporal', name: 'Temporal (Time)', weight: 0.85, active: true, desc: 'Filters graph knowledge by relative and absolute timestamps.' },
+                { id: 'spatial', name: 'Spatial (Location)', weight: 0.70, active: true, desc: 'Constrains nodes by geospatial bounds and regional relevance.' },
+                { id: 'topical', name: 'Topical (Subject)', weight: 0.95, active: true, desc: 'Clusters vectors into semantic taxonomy categories.' },
+                { id: 'social', name: 'Social (User / Org)', weight: 0.40, active: false, desc: 'Maps team hierarchy and organizational permissions.' },
+                { id: 'security', name: 'Security / Role Policy', weight: 0.90, active: true, desc: 'Enforces data classification and clearance levels.' },
+            ]);
+
+            // Save graph data to localStorage whenever modified
+            useEffect(() => {
+                localStorage.setItem('nexus_ckg_nodes', JSON.stringify(nodes));
+                localStorage.setItem('nexus_ckg_edges', JSON.stringify(edges));
+            }, [nodes, edges]);
+
+            // Save config updates to local storage
+            useEffect(() => {
+                localStorage.setItem('nexus_ckg_config', JSON.stringify(config));
+            }, [config]);
+
+            // Global Keyboard Shortcuts
+            useEffect(() => {
+                const handleKeyDown = (e) => {
+                    if (e.key === 'Escape') {
+                        setSelectedNode(null);
+                        setIsNodeModalOpen(false);
+                        setIsIngestModalOpen(false);
+                        setIsExportModalOpen(false);
+                    }
+                };
+                window.addEventListener('keydown', handleKeyDown);
+                return () => window.removeEventListener('keydown', handleKeyDown);
+            }, []);
+
+            const showToast = (msg) => {
+                setToastMessage(msg);
+                setTimeout(() => setToastMessage(null), 3000);
+            };
+
+            const resetToSeedData = () => {
+                setNodes(INITIAL_NODES);
+                setEdges(INITIAL_EDGES);
+                setSelectedNode(null);
+                localStorage.removeItem('nexus_ckg_nodes');
+                localStorage.removeItem('nexus_ckg_edges');
+                showToast("Graph reset to default initial state.");
+            };
+
+            const addNode = (newNode, connectedEdge) => {
+                setNodes(prev => [...prev, newNode]);
+                if (connectedEdge && connectedEdge.target) {
+                    setEdges(prev => [...prev, {
+                        id: `e_${Date.now()}`,
+                        source: newNode.id,
+                        target: connectedEdge.target,
+                        label: connectedEdge.label || 'connected_to',
+                        weight: 0.8
+                    }]);
+                }
+                showToast(`Node "${newNode.label}" added & persisted.`);
+            };
+
+            const handleBulkIngest = (newNodes, newEdges) => {
+                setNodes(prev => {
+                    const existingIds = new Set(prev.map(n => n.id));
+                    const filteredNew = newNodes.filter(n => !existingIds.has(n.id));
+                    return [...prev, ...filteredNew];
+                });
+                setEdges(prev => {
+                    const existingIds = new Set(prev.map(e => e.id));
+                    const filteredNew = newEdges.filter(e => !existingIds.has(e.id));
+                    return [...prev, ...filteredNew];
+                });
+                showToast(`Ingested & persisted ${newNodes.length} nodes and ${newEdges.length} edges.`);
+            };
+
+            return (
+                <div className={`min-h-screen flex flex-col transition-colors duration-300 ${highContrast ? 'high-contrast' : ''}`}>
+                    {/* Header Bar */}
+                    <Header 
+                        activeModule={activeModule} 
+                        setActiveModule={setActiveModule}
+                        highContrast={highContrast}
+                        setHighContrast={setHighContrast}
+                        onOpenIngest={() => setIsIngestModalOpen(true)}
+                        onOpenExport={() => setIsExportModalOpen(true)}
+                        onResetGraph={resetToSeedData}
+                    />
+
+                    {/* Main Workspace Layout */}
+                    <div className="flex-1 flex pt-16 overflow-hidden">
+                        {/* Sidebar Navigation */}
+                        <Sidebar activeModule={activeModule} setActiveModule={setActiveModule} />
+
+                        {/* Module Views */}
+                        <main className="flex-1 relative overflow-y-auto p-4 md:p-6 lg:p-8 ml-16 md:ml-64 transition-all" tabIndex="-1" id="main-content">
+                            {activeModule === 'dashboard' && (
+                                <DashboardView 
+                                    nodes={nodes} 
+                                    edges={edges} 
+                                    contexts={contexts}
+                                    setActiveModule={setActiveModule}
+                                />
+                            )}
+
+                            {activeModule === 'explorer' && (
+                                <ExplorerView 
+                                    nodes={nodes}
+                                    edges={edges}
+                                    selectedNode={selectedNode}
+                                    setSelectedNode={setSelectedNode}
+                                    searchQuery={searchQuery}
+                                    setSearchQuery={setSearchQuery}
+                                    filterType={filterType}
+                                    setFilterType={setFilterType}
+                                    setIsNodeModalOpen={setIsNodeModalOpen}
+                                    onOpenIngest={() => setIsIngestModalOpen(true)}
+                                    onOpenExport={() => setIsExportModalOpen(true)}
+                                />
+                            )}
+
+                            {activeModule === 'contexts' && (
+                                <ContextManagerView 
+                                    contexts={contexts}
+                                    setContexts={setContexts}
+                                    showToast={showToast}
+                                />
+                            )}
+
+                            {activeModule === 'config' && (
+                                <EngineConfigView 
+                                    config={config} 
+                                    setConfig={setConfig} 
+                                    showToast={showToast}
+                                />
+                            )}
+                        </main>
+                    </div>
+
+                    {/* Add Node Modal */}
+                    {isNodeModalOpen && (
+                        <AddNodeModal 
+                            nodes={nodes}
+                            onClose={() => setIsNodeModalOpen(false)}
+                            onAdd={addNode}
+                        />
+                    )}
+
+                    {/* Data Ingestion Modal */}
+                    {isIngestModalOpen && (
+                        <IngestionModal 
+                            onClose={() => setIsIngestModalOpen(false)}
+                            onIngest={handleBulkIngest}
+                        />
+                    )}
+
+                    {/* Data Export Modal */}
+                    {isExportModalOpen && (
+                        <ExportModal 
+                            nodes={nodes}
+                            edges={edges}
+                            onClose={() => setIsExportModalOpen(false)}
+                            showToast={showToast}
+                        />
+                    )}
+
+                    {/* Toast Notification Popup */}
+                    {toastMessage && (
+                        <div 
+                            role="status" 
+                            aria-live="polite"
+                            className="fixed bottom-6 right-6 z-50 glass-panel border border-cyan-500/50 text-cyan-300 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-bounce"
+                        >
+                            <i className="fa-solid fa-circle-check text-cyan-400"></i>
+                            <span className="text-sm font-medium">{toastMessage}</span>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // --- HEADER COMPONENT ---
+        const Header = ({ activeModule, setActiveModule, highContrast, setHighContrast, onOpenIngest, onOpenExport, onResetGraph }) => (
+            <header className="fixed top-0 left-0 w-full z-50 glass-panel h-16 flex items-center justify-between px-4 md:px-6 border-b border-slate-800">
+                <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 bg-gradient-to-tr from-cyan-500 via-blue-600 to-purple-600 rounded-xl flex items-center justify-center neon-glow">
+                        <i className="fa-solid fa-brain text-white text-base"></i>
+                    </div>
+                    <div>
+                        <h1 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 leading-tight">
+                            Nexus CKG Engine
+                        </h1>
+                        <p className="text-[10px] text-slate-400 hidden sm:block">Contextual Knowledge Graph v2.5 Pro</p>
+                    </div>
+                </div>
+
+                {/* Right controls */}
+                <div className="flex items-center gap-2 md:gap-3">
+                    <button
+                        onClick={onResetGraph}
+                        className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition-all flex items-center gap-1.5"
+                        title="Reset graph data back to original state"
+                    >
+                        <i className="fa-solid fa-rotate-left"></i>
+                        <span className="hidden lg:inline">Reset State</span>
+                    </button>
+
+                    <button
+                        onClick={onOpenIngest}
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 transition-all flex items-center gap-1.5"
+                    >
+                        <i className="fa-solid fa-file-import"></i>
+                        <span className="hidden sm:inline">Ingest Data</span>
+                    </button>
+
+                    <button
+                        onClick={onOpenExport}
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 transition-all flex items-center gap-1.5"
+                    >
+                        <i className="fa-solid fa-file-export"></i>
+                        <span className="hidden sm:inline">Export Graph</span>
+                    </button>
+
+                    <div className="h-6 w-[1px] bg-slate-800"></div>
+
+                    {/* Accessibility High Contrast Toggle */}
+                    <button
+                        onClick={() => setHighContrast(!highContrast)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all flex items-center gap-2 ${
+                            highContrast 
+                                ? 'bg-yellow-400 text-black border-yellow-300' 
+                                : 'bg-slate-800/80 hover:bg-slate-700 text-slate-300 border-slate-700'
+                        }`}
+                        aria-label="Toggle High Contrast Mode"
+                        title="Toggle High Contrast for Accessibility"
+                    >
+                        <i className="fa-solid fa-circle-half-stroke"></i>
+                        <span className="hidden md:inline">High Contrast</span>
+                    </button>
+
+                    <button 
+                        onClick={() => alert("Nexus Engine Documentation:\n1. Graph Explorer: Drag nodes, search by label, filter by context dimension.\n2. Zoom Tools: Use Default (1:1), Fit All Bounds, or Node Focus Zoom.\n3. Ingest Data: Import CKG, Context, or Entity graphs via JSON-LD, CSV, or Cypher.\n4. Persistence: Custom graph nodes are saved automatically in local browser storage.")}
+                        className="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center border border-slate-700 transition-colors"
+                        aria-label="System Documentation and Help"
+                        title="System Help & Docs"
+                    >
+                        <i className="fa-solid fa-circle-question"></i>
+                    </button>
+                </div>
+            </header>
+        );
+
+        // --- SIDEBAR COMPONENT ---
+        const Sidebar = ({ activeModule, setActiveModule }) => {
+            const navItems = [
+                { id: 'dashboard', icon: 'fa-chart-pie', label: 'Dashboard' },
+                { id: 'explorer', icon: 'fa-diagram-project', label: 'Graph Explorer / DB' },
+                { id: 'contexts', icon: 'fa-layer-group', label: 'Context Manager' },
+                { id: 'config', icon: 'fa-sliders', label: 'Engine Config' },
+            ];
+
+            return (
+                <aside 
+                    className="fixed left-0 top-16 w-16 md:w-64 h-[calc(100vh-64px)] glass-panel border-r border-slate-800 p-3 flex flex-col gap-2 z-40 transition-all"
+                    aria-label="Sidebar Navigation"
+                >
+                    <nav className="space-y-1.5 flex-1">
+                        {navItems.map(item => {
+                            const isActive = activeModule === item.id;
+                            return (
+                                <button
+                                    key={item.id}
+                                    onClick={() => setActiveModule(item.id)}
+                                    aria-current={isActive ? 'page' : undefined}
+                                    className={`w-full flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-sm font-medium transition-all ${
+                                        isActive
+                                            ? 'bg-gradient-to-r from-cyan-500/20 to-purple-500/10 text-cyan-300 border border-cyan-500/40 shadow-lg shadow-cyan-950/50'
+                                            : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 border border-transparent'
+                                    }`}
+                                >
+                                    <i className={`fa-solid ${item.icon} text-lg w-5 text-center ${isActive ? 'text-cyan-400' : 'text-slate-400'}`}></i>
+                                    <span className="hidden md:inline">{item.label}</span>
+                                </button>
+                            );
+                        })}
+                    </nav>
+
+                    {/* Vector Memory Card */}
+                    <div className="hidden md:block p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 mt-auto">
+                        <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
+                            <span className="font-medium">Vector Memory</span>
+                            <span className="text-cyan-400 font-mono">1.2 GB / 2 GB</span>
+                        </div>
+                        <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div className="bg-gradient-to-r from-cyan-500 to-purple-500 h-full w-[60%] rounded-full"></div>
+                        </div>
+                        <p className="text-[10px] text-slate-500 mt-2">HNSW Index Status: Optimized</p>
+                    </div>
+                </aside>
+            );
+        };
+
+        // --- EXPLORER VIEW (FORCE DIRECTED GRAPH & INSPECTOR) ---
+        const ExplorerView = ({ 
+            nodes, edges, selectedNode, setSelectedNode, 
+            searchQuery, setSearchQuery, filterType, setFilterType, setIsNodeModalOpen,
+            onOpenIngest, onOpenExport 
+        }) => {
+            const canvasRef = useRef(null);
+            const containerRef = useRef(null);
+            const [viewMode, setViewMode] = useState('graph'); // 'graph' or 'database'
+            const [activeDbTab, setActiveDbTab] = useState('nodes'); // 'nodes' or 'edges'
+            const [sortField, setSortField] = useState('label');
+            const [sortDirection, setSortDirection] = useState('asc');
+            const [zoom, setZoom] = useState(1);
+            const [pan, setPan] = useState({ x: 0, y: 0 });
+            const [isDragging, setIsDragging] = useState(false);
+            const [dragNode, setDragNode] = useState(null);
+            const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+            const [hoveredNode, setHoveredNode] = useState(null);
+
+            // Mutable node positions for physics simulation
+            const positionsRef = useRef({});
+
+            // Initialize or sync positions cleanly with bounded coordinates
+            const refreshGraphLayout = useCallback((recenter = false) => {
+                const width = 800;
+                const height = 600;
+                nodes.forEach((node, i) => {
+                    if (!positionsRef.current[node.id] || recenter) {
+                        const angle = (i / Math.max(nodes.length, 1)) * 2 * Math.PI;
+                        const radius = 140 + (i % 3) * 30;
+                        positionsRef.current[node.id] = {
+                            x: width / 2 + radius * Math.cos(angle),
+                            y: height / 2 + radius * Math.sin(angle),
+                            vx: 0,
+                            vy: 0
+                        };
+                    }
+                });
+            }, [nodes]);
+
+            // Call initial layout initialization
+            useEffect(() => {
+                refreshGraphLayout();
+            }, [refreshGraphLayout]);
+
+            // Synchronize Canvas Dimensions with Container Size (High-DPI / iFrame Aware)
+            useEffect(() => {
+                const updateCanvasSize = () => {
+                    const canvas = canvasRef.current;
+                    const container = containerRef.current;
+                    if (canvas && container) {
+                        const dpr = window.devicePixelRatio || 1;
+                        const displayWidth = container.clientWidth;
+                        const displayHeight = container.clientHeight;
+
+                        // Set actual buffer size scaled by device pixel ratio for sharp high-DPI/iframe text
+                        canvas.width = displayWidth * dpr;
+                        canvas.height = displayHeight * dpr;
+
+                        // Maintain CSS size matching display container
+                        canvas.style.width = `${displayWidth}px`;
+                        canvas.style.height = `${displayHeight}px`;
+                    }
+                };
+
+                updateCanvasSize();
+                window.addEventListener('resize', updateCanvasSize);
+                return () => window.removeEventListener('resize', updateCanvasSize);
+            }, []);
+
+            // Default Zoom Reset (1:1 Center)
+            const zoomDefault = () => {
+                setZoom(1.0);
+                setPan({ x: 0, y: 0 });
+            };
+
+            // Bounding Zoom (Fit all nodes accurately in frame)
+            const zoomToBoundingBox = useCallback(() => {
+                if (nodes.length === 0) return;
+                let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+                
+                nodes.forEach(n => {
+                    const p = positionsRef.current[n.id];
+                    if (p) {
+                        minX = Math.min(minX, p.x);
+                        maxX = Math.max(maxX, p.x);
+                        minY = Math.min(minY, p.y);
+                        maxY = Math.max(maxY, p.y);
+                    }
+                });
+
+                const canvas = canvasRef.current;
+                if (!canvas || minX === Infinity) return;
+
+                const padding = 100;
+                const boundingWidth = Math.max((maxX - minX) + padding * 2, 200);
+                const boundingHeight = Math.max((maxY - minY) + padding * 2, 200);
+
+                const scaleX = canvas.width / boundingWidth;
+                const scaleY = canvas.height / boundingHeight;
+                const targetZoom = Math.min(Math.max(Math.min(scaleX, scaleY), 0.4), 1.6);
+
+                const centerX = (minX + maxX) / 2;
+                const centerY = (minY + maxY) / 2;
+
+                setZoom(targetZoom);
+                setPan({
+                    x: (canvas.width / 2) - (centerX * targetZoom),
+                    y: (canvas.height / 2) - (centerY * targetZoom)
+                });
+            }, [nodes]);
+
+            // Auto fit bounds on initial view mount
+            useEffect(() => {
+                const timer = setTimeout(() => zoomToBoundingBox(), 200);
+                return () => clearTimeout(timer);
+            }, [nodes.length, zoomToBoundingBox]);
+
+            // Focus Zoom on Selected Node
+            const zoomToSelectedNode = useCallback(() => {
+                if (!selectedNode) return;
+                const p = positionsRef.current[selectedNode.id];
+                const canvas = canvasRef.current;
+                if (!p || !canvas) return;
+
+                const targetZoom = 1.6;
+                setZoom(targetZoom);
+                setPan({
+                    x: (canvas.width / 2) - (p.x * targetZoom),
+                    y: (canvas.height / 2) - (p.y * targetZoom)
+                });
+            }, [selectedNode]);
+
+            // Filtered node set
+            const filteredNodes = useMemo(() => {
+                let result = nodes.filter(n => {
+                    const matchesSearch = n.label.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                          n.desc.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                          n.id.toLowerCase().includes(searchQuery.toLowerCase());
+                    const matchesType = filterType === 'all' || n.type === filterType;
+                    return matchesSearch && matchesType;
+                });
+
+                // Sort for Database view
+                return result.sort((a, b) => {
+                    let valA = a[sortField] || '';
+                    let valB = b[sortField] || '';
+                    if (typeof valA === 'string') valA = valA.toLowerCase();
+                    if (typeof valB === 'string') valB = valB.toLowerCase();
+                    if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+                    if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+                    return 0;
+                });
+            }, [nodes, searchQuery, filterType, sortField, sortDirection]);
+
+            const filteredNodeIds = useMemo(() => new Set(filteredNodes.map(n => n.id)), [filteredNodes]);
+
+            // Filtered edges set for DB View
+            const filteredEdges = useMemo(() => {
+                return edges.filter(e => {
+                    const srcNode = nodes.find(n => n.id === e.source);
+                    const tgtNode = nodes.find(n => n.id === e.target);
+                    const srcLabel = srcNode ? srcNode.label : e.source;
+                    const tgtLabel = tgtNode ? tgtNode.label : e.target;
+                    
+                    return e.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           e.source.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           e.target.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           srcLabel.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           tgtLabel.toLowerCase().includes(searchQuery.toLowerCase());
+                });
+            }, [edges, nodes, searchQuery]);
+
+            // Stable Physics & Canvas Animation Loop
+            useEffect(() => {
+                if (viewMode !== 'graph') return;
+                const canvas = canvasRef.current;
+                const container = containerRef.current;
+                if (!canvas || !container) return;
+                const ctx = canvas.getContext('2d');
+                let animationFrameId;
+
+                const simulatePhysicsAndRender = () => {
+                    const width = container.clientWidth;
+                    const height = container.clientHeight;
+                    const dpr = window.devicePixelRatio || 1;
+
+                    // Repulsion and link physics forces
+                    nodes.forEach(n1 => {
+                        const p1 = positionsRef.current[n1.id];
+                        if (!p1) return;
+
+                        // Central gravity pull to keep nodes in view
+                        p1.vx += (width / 2 - p1.x) * 0.0003;
+                        p1.vy += (height / 2 - p1.y) * 0.0003;
+
+                        nodes.forEach(n2 => {
+                            if (n1.id === n2.id) return;
+                            const p2 = positionsRef.current[n2.id];
+                            if (!p2) return;
+                            const dx = p1.x - p2.x;
+                            const dy = p1.y - p2.y;
+                            const dist = Math.hypot(dx, dy) || 1;
+                            if (dist < 220) {
+                                const force = (220 - dist) / dist * 0.15;
+                                p1.vx += (dx / dist) * force;
+                                p1.vy += (dy / dist) * force;
+                            }
+                        });
+                    });
+
+                    // Edge spring forces
+                    edges.forEach(e => {
+                        const p1 = positionsRef.current[e.source];
+                        const p2 = positionsRef.current[e.target];
+                        if (p1 && p2) {
+                            const dx = p2.x - p1.x;
+                            const dy = p2.y - p1.y;
+                            const dist = Math.hypot(dx, dy) || 1;
+                            const force = (dist - 120) * 0.002;
+                            p1.vx += (dx / dist) * force;
+                            p1.vy += (dy / dist) * force;
+                            p2.vx -= (dx / dist) * force;
+                            p2.vy -= (dy / dist) * force;
+                        }
+                    });
+
+                    // Update position with velocity damping
+                    nodes.forEach(n => {
+                        const p = positionsRef.current[n.id];
+                        if (p && dragNode !== n.id) {
+                            p.vx *= 0.65;
+                            p.vy *= 0.65;
+                            p.x += Math.max(-8, Math.min(8, p.vx));
+                            p.y += Math.max(-8, Math.min(8, p.vy));
+                        }
+                    });
+
+                    // Clear Canvas
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.save();
+                    ctx.scale(dpr, dpr);
+                    ctx.translate(pan.x, pan.y);
+                    ctx.scale(zoom, zoom);
+
+                    // Render Edges
+                    edges.forEach(e => {
+                        const p1 = positionsRef.current[e.source];
+                        const p2 = positionsRef.current[e.target];
+                        if (p1 && p2) {
+                            const isHighlighted = (selectedNode && (e.source === selectedNode.id || e.target === selectedNode.id)) ||
+                                                (hoveredNode && (e.source === hoveredNode.id || e.target === hoveredNode.id));
+
+                            ctx.beginPath();
+                            ctx.moveTo(p1.x, p1.y);
+                            ctx.lineTo(p2.x, p2.y);
+                            ctx.strokeStyle = isHighlighted ? '#22d3ee' : 'rgba(148, 163, 184, 0.25)';
+                            ctx.lineWidth = isHighlighted ? 2.5 : 1.2;
+                            ctx.stroke();
+
+                            // Edge Label
+                            const midX = (p1.x + p2.x) / 2;
+                            const midY = (p1.y + p2.y) / 2;
+                            ctx.fillStyle = isHighlighted ? '#22d3ee' : 'rgba(148, 163, 184, 0.6)';
+                            ctx.font = '10px Inter, sans-serif';
+                            ctx.textAlign = 'center';
+                            ctx.fillText(e.label, midX, midY - 4);
+                        }
+                    });
+
+                    // Render Nodes
+                    nodes.forEach(n => {
+                        const p = positionsRef.current[n.id];
+                        if (!p) return;
+
+                        const isFiltered = filteredNodeIds.has(n.id);
+                        const isSelected = selectedNode && selectedNode.id === n.id;
+                        const isHovered = hoveredNode && hoveredNode.id === n.id;
+                        const radius = n.val || 18;
+
+                        ctx.save();
+                        ctx.globalAlpha = isFiltered ? 1 : 0.25;
+
+                        // Outer Glow Effect for Selected / Hovered
+                        if (isSelected || isHovered) {
+                            ctx.beginPath();
+                            ctx.arc(p.x, p.y, radius + 8, 0, 2 * Math.PI);
+                            ctx.fillStyle = isSelected ? 'rgba(34, 211, 238, 0.25)' : 'rgba(168, 85, 247, 0.25)';
+                            ctx.fill();
+                        }
+
+                        // Node Circle Body
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, radius, 0, 2 * Math.PI);
+                        ctx.fillStyle = n.color || '#38bdf8';
+                        ctx.fill();
+
+                        ctx.lineWidth = isSelected ? 3 : 1.5;
+                        ctx.strokeStyle = isSelected ? '#ffffff' : 'rgba(255, 255, 255, 0.3)';
+                        ctx.stroke();
+
+                        // Label Backing Pill
+                        ctx.font = '11px Inter, sans-serif';
+                        const textMetrics = ctx.measureText(n.label);
+                        const labelWidth = textMetrics.width + 12;
+                        const labelHeight = 18;
+
+                        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+                        if (ctx.roundRect) {
+                            ctx.beginPath();
+                            ctx.roundRect(p.x - labelWidth / 2, p.y + radius + 4, labelWidth, labelHeight, 4);
+                            ctx.fill();
+                        } else {
+                            ctx.fillRect(p.x - labelWidth / 2, p.y + radius + 4, labelWidth, labelHeight);
+                        }
+
+                        // Text Label
+                        ctx.fillStyle = isSelected ? '#22d3ee' : '#f8fafc';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(n.label, p.x, p.y + radius + 13);
+
+                        ctx.restore();
+                    });
+
+                    ctx.restore();
+                    animationFrameId = requestAnimationFrame(simulatePhysicsAndRender);
+                };
+
+                simulatePhysicsAndRender();
+
+                return () => cancelAnimationFrame(animationFrameId);
+            }, [nodes, edges, zoom, pan, filteredNodeIds, selectedNode, hoveredNode, dragNode, viewMode]);
+
+            // Mouse Event Handlers
+            const handleMouseDown = (e) => {
+                if (viewMode !== 'graph') return;
+                const rect = canvasRef.current.getBoundingClientRect();
+                const mouseX = (e.clientX - rect.left - pan.x) / zoom;
+                const mouseY = (e.clientY - rect.top - pan.y) / zoom;
+
+                const clickedNode = nodes.find(node => {
+                    const p = positionsRef.current[node.id];
+                    if (!p) return false;
+                    return Math.hypot(p.x - mouseX, p.y - mouseY) <= (node.val || 18);
+                });
+
+                if (clickedNode) {
+                    setSelectedNode(clickedNode);
+                    setDragNode(clickedNode.id);
+                } else {
+                    setIsDragging(true);
+                    setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
+                }
+            };
+
+            const handleMouseMove = (e) => {
+                const rect = canvasRef.current.getBoundingClientRect();
+                const mouseX = (e.clientX - rect.left - pan.x) / zoom;
+                const mouseY = (e.clientY - rect.top - pan.y) / zoom;
+
+                if (dragNode && positionsRef.current[dragNode]) {
+                    positionsRef.current[dragNode].x = mouseX;
+                    positionsRef.current[dragNode].y = mouseY;
+                    positionsRef.current[dragNode].vx = 0;
+                    positionsRef.current[dragNode].vy = 0;
+                } else if (isDragging) {
+                    setPan({
+                        x: e.clientX - dragStart.x,
+                        y: e.clientY - dragStart.y
+                    });
+                } else {
+                    const hoverTarget = nodes.find(node => {
+                        const p = positionsRef.current[node.id];
+                        if (!p) return false;
+                        return Math.hypot(p.x - mouseX, p.y - mouseY) <= (node.val || 18);
+                    });
+                    setHoveredNode(hoverTarget || null);
+                }
+            };
+
+            const handleMouseUp = () => {
+                setDragNode(null);
+                setIsDragging(false);
+            };
+
+            return (
+                <div className="h-[calc(100vh-112px)] flex flex-col gap-4">
+                    {/* Top Control Bar */}
+                    <div className="glass-panel p-3.5 rounded-2xl flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex flex-wrap items-center gap-3 flex-1">
+                            {/* View Switcher Toggle */}
+                            <div className="flex bg-slate-900/90 p-1 rounded-xl border border-slate-700/80">
+                                <button
+                                    onClick={() => setViewMode('graph')}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                                        viewMode === 'graph' 
+                                            ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm' 
+                                            : 'text-slate-400 hover:text-slate-200'
+                                    }`}
+                                >
+                                    <i className="fa-solid fa-diagram-project text-xs"></i>
+                                    Graph View
+                                </button>
+                                <button
+                                    onClick={() => setViewMode('database')}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                                        viewMode === 'database' 
+                                            ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40 shadow-sm' 
+                                            : 'text-slate-400 hover:text-slate-200'
+                                    }`}
+                                >
+                                    <i className="fa-solid fa-database text-xs"></i>
+                                    Database View
+                                </button>
+                            </div>
+
+                            <div className="relative min-w-[200px]">
+                                <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                                <input 
+                                    type="text"
+                                    placeholder={viewMode === 'graph' ? "Search nodes..." : "Filter database records..."}
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl pl-9 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-colors"
+                                    aria-label="Filter records"
+                                />
+                            </div>
+
+                            {viewMode === 'graph' ? (
+                                <select 
+                                    value={filterType}
+                                    onChange={(e) => setFilterType(e.target.value)}
+                                    className="bg-slate-900/80 border border-slate-700/80 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"
+                                    aria-label="Filter by Node Type"
+                                >
+                                    <option value="all">All Graph Types</option>
+                                    <option value="ckg">CKG Core</option>
+                                    <option value="entity">Entity Graph</option>
+                                    <option value="context">Context Layer</option>
+                                    <option value="temporal">Temporal (Time)</option>
+                                    <option value="spatial">Spatial (Geo)</option>
+                                    <option value="topical">Topical Vector</option>
+                                </select>
+                            ) : (
+                                <div className="flex bg-slate-900/80 p-0.5 rounded-xl border border-slate-800">
+                                    <button 
+                                        onClick={() => setActiveDbTab('nodes')} 
+                                        className={`px-3 py-1 rounded-lg text-xs font-medium ${activeDbTab === 'nodes' ? 'bg-slate-800 text-cyan-300' : 'text-slate-400'}`}
+                                    >
+                                        Nodes Table ({nodes.length})
+                                    </button>
+                                    <button 
+                                        onClick={() => setActiveDbTab('edges')} 
+                                        className={`px-3 py-1 rounded-lg text-xs font-medium ${activeDbTab === 'edges' ? 'bg-slate-800 text-purple-300' : 'text-slate-400'}`}
+                                    >
+                                        Edges Table ({edges.length})
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            {viewMode === 'graph' && (
+                                <button
+                                    onClick={() => { refreshGraphLayout(true); zoomToBoundingBox(); }}
+                                    className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-semibold border border-slate-700 transition-all flex items-center gap-1.5"
+                                    title="Recalculate layout & center view"
+                                >
+                                    <i className="fa-solid fa-rotate text-xs"></i>
+                                    Refresh Physics
+                                </button>
+                            )}
+
+                            <button
+                                onClick={onOpenIngest}
+                                className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-400 text-xs font-semibold border border-slate-700 transition-all flex items-center gap-1.5"
+                            >
+                                <i className="fa-solid fa-file-import"></i>
+                                Ingest
+                            </button>
+
+                            <button
+                                onClick={onOpenExport}
+                                className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-purple-300 text-xs font-semibold border border-slate-700 transition-all flex items-center gap-1.5"
+                            >
+                                <i className="fa-solid fa-file-export"></i>
+                                Export
+                            </button>
+
+                            <button
+                                onClick={() => setIsNodeModalOpen(true)}
+                                className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-semibold text-xs transition-all shadow-md flex items-center gap-2"
+                                aria-label="Add Node to Knowledge Graph"
+                            >
+                                <i className="fa-solid fa-plus"></i>
+                                Add Record
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Canvas & Inspector Split Area OR Database Grid View */}
+                    <div className="flex-1 flex gap-4 overflow-hidden relative">
+                        {viewMode === 'graph' ? (
+                            <div ref={containerRef} id="graph-canvas-container" className="flex-1 glass-panel rounded-2xl overflow-hidden relative border border-slate-800 cursor-grab active:cursor-grabbing w-full">
+                                <canvas 
+                                    ref={canvasRef}
+                                    onMouseDown={handleMouseDown}
+                                    onMouseMove={handleMouseMove}
+                                    onMouseUp={handleMouseUp}
+                                    className="w-full h-full block"
+                                    aria-label="Interactive Contextual Knowledge Graph Canvas"
+                                />
+
+                                {/* Zoom Controls Bar */}
+                                <div className="absolute bottom-4 left-4 glass-panel p-1.5 rounded-xl flex flex-col gap-1 z-10 border border-slate-700 shadow-xl">
+                                    <button 
+                                        onClick={() => setZoom(z => Math.min(z + 0.25, 3.0))}
+                                        className="w-9 h-9 bg-slate-800 hover:bg-slate-700 active:bg-cyan-500 active:text-black rounded-lg text-slate-300 text-xs flex items-center justify-center transition-all"
+                                        aria-label="Zoom In"
+                                        title="Zoom In (+)"
+                                    >
+                                        <i className="fa-solid fa-plus"></i>
+                                    </button>
+                                    <button 
+                                        onClick={() => setZoom(z => Math.max(z - 0.25, 0.3))}
+                                        className="w-9 h-9 bg-slate-800 hover:bg-slate-700 active:bg-cyan-500 active:text-black rounded-lg text-slate-300 text-xs flex items-center justify-center transition-all"
+                                        aria-label="Zoom Out"
+                                        title="Zoom Out (-)"
+                                    >
+                                        <i className="fa-solid fa-minus"></i>
+                                    </button>
+                                    
+                                    <div className="h-[1px] bg-slate-700 my-0.5"></div>
+
+                                    <button 
+                                        onClick={zoomDefault}
+                                        className="w-9 h-9 bg-slate-800 hover:bg-slate-700 rounded-lg text-cyan-400 text-xs flex items-center justify-center transition-all"
+                                        aria-label="Default Zoom"
+                                        title="Default Zoom (1:1 Reset Center)"
+                                    >
+                                        <i className="fa-solid fa-compress"></i>
+                                    </button>
+
+                                    <button 
+                                        onClick={zoomToBoundingBox}
+                                        className="w-9 h-9 bg-slate-800 hover:bg-slate-700 rounded-lg text-purple-400 text-xs flex items-center justify-center transition-all"
+                                        aria-label="Fit All Nodes Zoom"
+                                        title="Fit All Nodes in Frame"
+                                    >
+                                        <i className="fa-solid fa-expand"></i>
+                                    </button>
+
+                                    <button 
+                                        onClick={zoomToSelectedNode}
+                                        disabled={!selectedNode}
+                                        className={`w-9 h-9 rounded-lg text-xs flex items-center justify-center transition-all ${
+                                            selectedNode 
+                                                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 hover:bg-cyan-500/40' 
+                                                : 'bg-slate-800/40 text-slate-600 cursor-not-allowed'
+                                        }`}
+                                        aria-label="Focus Node Zoom"
+                                        title={selectedNode ? `Zoom & Focus on "${selectedNode.label}"` : "Select a node first to use Focus Zoom"}
+                                    >
+                                        <i className="fa-solid fa-crosshairs"></i>
+                                    </button>
+                                </div>
+
+                                {/* Legend */}
+                                <div className="absolute bottom-4 right-4 glass-panel px-3 py-2 rounded-xl text-[11px] text-slate-300 flex flex-wrap gap-3 border border-slate-700">
+                                    <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[#38bdf8]"></span>CKG</div>
+                                    <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[#10b981]"></span>Entity</div>
+                                    <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[#a855f7]"></span>Temporal</div>
+                                    <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[#f59e0b]"></span>Spatial</div>
+                                    <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[#ec4899]"></span>Topical</div>
+                                </div>
+                            </div>
+                        ) : (
+                            /* DATABASE GRID VIEW COMPONENT */
+                            <div className="flex-1 glass-panel rounded-2xl p-4 border border-slate-800 overflow-hidden flex flex-col">
+                                {activeDbTab === 'nodes' ? (
+                                    <div className="overflow-auto flex-1">
+                                        <table className="w-full text-left text-xs text-slate-300 border-collapse">
+                                            <thead className="bg-slate-900/90 text-slate-400 font-semibold uppercase tracking-wider sticky top-0 border-b border-slate-800">
+                                                <tr>
+                                                    <th className="p-3">Node ID</th>
+                                                    <th className="p-3">Label / Name</th>
+                                                    <th className="p-3">Category Type</th>
+                                                    <th className="p-3">Description Context</th>
+                                                    <th className="p-3">Degree Links</th>
+                                                    <th className="p-3 text-right">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-slate-800/60 font-sans">
+                                                {filteredNodes.map(node => {
+                                                    const connectionCount = edges.filter(e => e.source === node.id || e.target === node.id).length;
+                                                    const isSelected = selectedNode && selectedNode.id === node.id;
+                                                    return (
+                                                        <tr 
+                                                            key={node.id}
+                                                            onClick={() => setSelectedNode(node)}
+                                                            className={`hover:bg-slate-800/50 cursor-pointer transition-colors ${
+                                                                isSelected ? 'bg-cyan-500/10 border-l-2 border-cyan-400' : ''
+                                                            }`}
+                                                        >
+                                                            <td className="p-3 font-mono text-cyan-400">{node.id}</td>
+                                                            <td className="p-3 font-semibold text-white flex items-center gap-2">
+                                                                <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: node.color }}></span>
+                                                                {node.label}
+                                                            </td>
+                                                            <td className="p-3">
+                                                                <span className="px-2 py-0.5 rounded-full text-[10px] bg-slate-800 border border-slate-700 text-slate-300 uppercase">
+                                                                    {node.type}
+                                                                </span>
+                                                            </td>
+                                                            <td className="p-3 text-slate-400 max-w-xs truncate">{node.desc}</td>
+                                                            <td className="p-3">
+                                                                <span className="px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-300 font-mono text-[11px] border border-purple-500/20">
+                                                                    {connectionCount} edges
+                                                                </span>
+                                                            </td>
+                                                            <td className="p-3 text-right">
+                                                                <button 
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setSelectedNode(node);
+                                                                    }}
+                                                                    className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-cyan-400 rounded-lg text-[11px] border border-slate-700"
+                                                                >
+                                                                    Inspect
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                ) : (
+                                    <div className="overflow-auto flex-1">
+                                        <table className="w-full text-left text-xs text-slate-300 border-collapse">
+                                            <thead className="bg-slate-900/90 text-slate-400 font-semibold uppercase tracking-wider sticky top-0 border-b border-slate-800">
+                                                <tr>
+                                                    <th className="p-3">Edge ID</th>
+                                                    <th className="p-3">Source Node</th>
+                                                    <th className="p-3">Relationship Label</th>
+                                                    <th className="p-3">Target Node</th>
+                                                    <th className="p-3">Weight Score</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-slate-800/60 font-sans">
+                                                {filteredEdges.map(edge => {
+                                                    const srcNode = nodes.find(n => n.id === edge.source);
+                                                    const tgtNode = nodes.find(n => n.id === edge.target);
+                                                    return (
+                                                        <tr key={edge.id} className="hover:bg-slate-800/50 transition-colors">
+                                                            <td className="p-3 font-mono text-purple-400">{edge.id}</td>
+                                                            <td className="p-3 font-semibold text-slate-200">
+                                                                {srcNode ? srcNode.label : edge.source} 
+                                                                <span className="text-[10px] text-slate-500 ml-1 font-mono">({edge.source})</span>
+                                                            </td>
+                                                            <td className="p-3">
+                                                                <span className="px-2 py-0.5 rounded-full text-[10px] bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-mono">
+                                                                    {edge.label}
+                                                                </span>
+                                                            </td>
+                                                            <td className="p-3 font-semibold text-slate-200">
+                                                                {tgtNode ? tgtNode.label : edge.target}
+                                                                <span className="text-[10px] text-slate-500 ml-1 font-mono">({edge.target})</span>
+                                                            </td>
+                                                            <td className="p-3 font-mono text-emerald-400">{edge.weight || 0.8}</td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Inspector Side Drawer (Sliding Overlay / Dynamic Width) */}
+                        {selectedNode && (
+                            <div className="w-full sm:w-80 md:w-96 glass-panel rounded-2xl p-5 border border-slate-700 flex flex-col gap-4 overflow-y-auto animate-fade-in z-20 shrink-0">
+                                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                                    <div className="flex items-center gap-2">
+                                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: selectedNode.color }}></span>
+                                        <span className="text-xs uppercase font-semibold text-slate-400 tracking-wider">{selectedNode.type} Node</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        {viewMode === 'graph' && (
+                                            <button 
+                                                onClick={zoomToSelectedNode}
+                                                className="text-cyan-400 hover:text-cyan-300 text-xs p-1 px-2 rounded bg-slate-800 border border-slate-700 flex items-center gap-1"
+                                                title="Zoom directly to this node"
+                                            >
+                                                <i className="fa-solid fa-crosshairs"></i>Focus
+                                            </button>
+                                        )}
+                                        <button 
+                                            onClick={() => setSelectedNode(null)}
+                                            className="text-slate-400 hover:text-white text-sm p-1 ml-1"
+                                            aria-label="Close Node Inspector"
+                                        >
+                                            <i className="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h3 className="text-lg font-bold text-white mb-1">{selectedNode.label}</h3>
+                                    <p className="text-xs text-slate-400 leading-relaxed">{selectedNode.desc}</p>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider">Node Vector Parameters</h4>
+                                    <div className="bg-slate-900/80 p-3 rounded-xl border border-slate-800 space-y-1.5 text-xs font-mono">
+                                        {selectedNode.metrics && Object.entries(selectedNode.metrics).map(([key, val]) => (
+                                            <div key={key} className="flex justify-between">
+                                                <span className="text-slate-500">{key}:</span>
+                                                <span className="text-cyan-400">{val}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Connected Knowledge Links</h4>
+                                    <div className="space-y-2">
+                                        {edges.filter(e => e.source === selectedNode.id || e.target === selectedNode.id).map(edge => {
+                                            const otherId = edge.source === selectedNode.id ? edge.target : edge.source;
+                                            const targetNode = nodes.find(n => n.id === otherId);
+                                            return (
+                                                <div 
+                                                    key={edge.id}
+                                                    onClick={() => targetNode && setSelectedNode(targetNode)}
+                                                    className="p-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-800 border border-slate-800 hover:border-cyan-500/30 transition-all cursor-pointer flex items-center justify-between"
+                                                >
+                                                    <div>
+                                                        <p className="text-xs font-medium text-slate-200">{targetNode ? targetNode.label : 'Unknown'}</p>
+                                                        <p className="text-[10px] text-cyan-400">{edge.label}</p>
+                                                    </div>
+                                                    <i className="fa-solid fa-chevron-right text-xs text-slate-500"></i>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // --- DASHBOARD VIEW ---
+        const DashboardView = ({ nodes, edges, contexts, setActiveModule }) => {
+            const metrics = [
+                { label: 'Indexed Nodes', value: nodes.length, change: '+14% target', icon: 'fa-nodes-text', color: 'text-cyan-400' },
+                { label: 'Knowledge Edges', value: edges.length, change: 'Optimal density', icon: 'fa-diagram-successor', color: 'text-purple-400' },
+                { label: 'Context Dimensions', value: contexts.filter(c => c.active).length, change: 'Active filtering', icon: 'fa-layer-group', color: 'text-emerald-400' },
+                { label: 'Mean Query Latency', value: '38ms', change: '-4ms speedup', icon: 'fa-bolt-lightning', color: 'text-amber-400' },
+            ];
+
+            return (
+                <div className="space-y-6 animate-fade-in">
+                    {/* Top Stats Overview Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {metrics.map((m, idx) => (
+                            <div key={idx} className="glass-card p-5 rounded-2xl border border-slate-800 relative overflow-hidden">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <p className="text-slate-400 text-xs font-medium uppercase tracking-wider">{m.label}</p>
+                                        <h3 className="text-2xl font-bold text-white mt-1.5">{m.value}</h3>
+                                    </div>
+                                    <div className={`p-3 rounded-xl bg-slate-900/80 border border-slate-800 ${m.color}`}>
+                                        <i className={`fa-solid ${m.icon} text-lg`}></i>
+                                    </div>
+                                </div>
+                                <p className="text-xs text-emerald-400 mt-3 flex items-center gap-1">
+                                    <i className="fa-solid fa-arrow-trend-up text-[10px]"></i>
+                                    {m.change}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Dashboard Visualizations Grid */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        {/* Simulated Throughput Graph */}
+                        <div className="lg:col-span-2 glass-panel p-6 rounded-2xl border border-slate-800 flex flex-col justify-between">
+                            <div className="flex items-center justify-between mb-4">
+                                <div>
+                                    <h3 className="text-base font-bold text-white">Contextual Query Throughput</h3>
+                                    <p className="text-xs text-slate-400">Live request volume across vector & graph fusion index</p>
+                                </div>
+                                <span className="text-xs bg-cyan-500/10 text-cyan-400 px-2.5 py-1 rounded-full border border-cyan-500/20">
+                                    Live Telemetry
+                                </span>
+                            </div>
+
+                            {/* Synthetic Chart Visual */}
+                            <div className="h-48 w-full flex items-end gap-2 pt-8 border-b border-slate-800">
+                                {[40, 65, 50, 80, 95, 70, 85, 100, 75, 90, 110, 85, 120, 95, 105].map((val, i) => (
+                                    <div key={i} className="flex-1 bg-slate-800 hover:bg-cyan-500/40 rounded-t-sm transition-all group relative">
+                                        <div 
+                                            className="bg-gradient-to-t from-blue-600 to-cyan-400 rounded-t-sm w-full transition-all" 
+                                            style={{ height: `${(val / 120) * 100}%` }}
+                                        ></div>
+                                        {/* Tooltip */}
+                                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 text-cyan-300 text-[10px] px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap border border-slate-700">
+                                            {val * 12} req/s
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="flex justify-between text-[11px] text-slate-500 mt-2">
+                                <span>10:00 AM</span>
+                                <span>10:30 AM</span>
+                                <span>11:00 AM</span>
+                                <span>11:30 AM</span>
+                                <span>12:00 PM</span>
+                            </div>
+                        </div>
+
+                        {/* Node Distribution Panel */}
+                        <div className="glass-panel p-6 rounded-2xl border border-slate-800 flex flex-col justify-between">
+                            <div>
+                                <h3 className="text-base font-bold text-white mb-1">Knowledge Taxonomy</h3>
+                                <p className="text-xs text-slate-400 mb-4">Node distribution by dimension layer</p>
+
+                                <div className="space-y-3">
+                                    {[
+                                        { label: 'CKG Core Concepts', count: 4, pct: '40%', color: 'bg-cyan-400' },
+                                        { label: 'Entity Records', count: 2, pct: '25%', color: 'bg-emerald-400' },
+                                        { label: 'Temporal Vectors', count: 1, pct: '15%', color: 'bg-purple-400' },
+                                        { label: 'Spatial Boundaries', count: 1, pct: '10%', color: 'bg-amber-400' },
+                                        { label: 'Topical Clusters', count: 1, pct: '10%', color: 'bg-pink-400' },
+                                    ].map((item, idx) => (
+                                        <div key={idx} className="space-y-1">
+                                            <div className="flex justify-between text-xs">
+                                                <span className="text-slate-300">{item.label}</span>
+                                                <span className="text-slate-400 font-mono">{item.count} ({item.pct})</span>
+                                            </div>
+                                            <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                                                <div className={`${item.color} h-full rounded-full`} style={{ width: item.pct }}></div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <button 
+                                onClick={() => setActiveModule('explorer')}
+                                className="w-full mt-6 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-400 text-xs font-semibold border border-slate-700 transition-all flex items-center justify-center gap-2"
+                            >
+                                Launch Graph Explorer
+                                <i className="fa-solid fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- CONTEXT MANAGER VIEW ---
+        const ContextManagerView = ({ contexts, setContexts, showToast }) => {
+            const toggleContext = (id) => {
+                setContexts(prev => prev.map(c => c.id === id ? { ...c, active: !c.active } : c));
+                showToast("Context status updated.");
+            };
+
+            const updateWeight = (id, newWeight) => {
+                setContexts(prev => prev.map(c => c.id === id ? { ...c, weight: parseFloat(newWeight) } : c));
+            };
+
+            return (
+                <div className="space-y-6 max-w-5xl mx-auto animate-fade-in">
+                    <div>
+                        <h2 className="text-xl font-bold text-white">Context Dimension Manager</h2>
+                        <p className="text-xs text-slate-400">Configure context weightings for vector constraint filtering & graph expansion.</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {contexts.map(ctx => (
+                            <div 
+                                key={ctx.id}
+                                className={`glass-panel p-5 rounded-2xl border transition-all ${
+                                    ctx.active ? 'border-slate-700' : 'border-slate-800/40 opacity-60'
+                                }`}
+                            >
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="flex items-center gap-2.5">
+                                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm ${
+                                            ctx.active ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' : 'bg-slate-800 text-slate-500'
+                                        }`}>
+                                            <i className="fa-solid fa-cube"></i>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-sm font-bold text-white">{ctx.name}</h3>
+                                            <span className="text-[10px] text-slate-400">ID: {ctx.id}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Toggle switch */}
+                                    <button
+                                        onClick={() => toggleContext(ctx.id)}
+                                        className={`w-11 h-6 rounded-full transition-colors relative p-0.5 ${
+                                            ctx.active ? 'bg-cyan-500' : 'bg-slate-800'
+                                        }`}
+                                        aria-label={`Toggle ${ctx.name}`}
+                                    >
+                                        <div className={`w-5 h-5 rounded-full bg-white transition-transform ${
+                                            ctx.active ? 'translate-x-5' : 'translate-x-0'
+                                        }`}></div>
+                                    </button>
+                                </div>
+
+                                <p className="text-xs text-slate-400 leading-relaxed mb-4">{ctx.desc}</p>
+
+                                {/* Weight Slider */}
+                                <div className="space-y-1.5">
+                                    <div className="flex justify-between text-xs">
+                                        <span className="text-slate-400">Dimension Influence Weight</span>
+                                        <span className="text-cyan-400 font-mono font-semibold">{(ctx.weight * 100).toFixed(0)}%</span>
+                                    </div>
+                                    <input 
+                                        type="range"
+                                        min="0"
+                                        max="1"
+                                        step="0.05"
+                                        value={ctx.weight}
+                                        disabled={!ctx.active}
+                                        onChange={(e) => updateWeight(ctx.id, e.target.value)}
+                                        className="w-full accent-cyan-400 bg-slate-800 rounded-lg cursor-pointer disabled:cursor-not-allowed"
+                                        aria-label={`${ctx.name} weight slider`}
+                                    />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        // --- ENGINE CONFIG VIEW ---
+        const EngineConfigView = ({ config, setConfig, showToast }) => {
+            const handleChange = (field, value) => {
+                setConfig(prev => ({ ...prev, [field]: value }));
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                showToast("Engine Configuration saved to local storage.");
+            };
+
+            return (
+                <div className="max-w-3xl mx-auto glass-panel p-6 rounded-2xl border border-slate-800 animate-fade-in space-y-6">
+                    <div>
+                        <h2 className="text-lg font-bold text-white">Engine & RAG Parameters</h2>
+                        <p className="text-xs text-slate-400">Configure embedding parameters and graph context fusion thresholds.</p>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="space-y-5">
+                        {/* Embedding Model */}
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-medium text-slate-300">Embedding Vector Model</label>
+                            <select 
+                                value={config.embeddingModel}
+                                onChange={(e) => handleChange('embeddingModel', e.target.value)}
+                                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"
+                            >
+                                <option value="text-embedding-3-large">OpenAI text-embedding-3-large (1536-dim)</option>
+                                <option value="bge-m3-multilingual">BGE-M3 Multilingual Vector Engine</option>
+                                <option value="cohere-embed-v3">Cohere Embed v3 Contextual</option>
+                            </select>
+                        </div>
+
+                        {/* Top K & Threshold */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-medium text-slate-300">Top-K Retrieval Nodes</label>
+                                <input 
+                                    type="number" 
+                                    value={config.topK}
+                                    onChange={(e) => handleChange('topK', parseInt(e.target.value))}
+                                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"
+                                />
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-medium text-slate-300">Cosine Similarity Threshold</label>
+                                <input 
+                                    type="number" 
+                                    step="0.01"
+                                    value={config.cosineThreshold}
+                                    onChange={(e) => handleChange('cosineThreshold', parseFloat(e.target.value))}
+                                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Fusion Alpha Slider */}
+                        <div className="space-y-1.5">
+                            <div className="flex justify-between text-xs">
+                                <span className="text-slate-300">Vector vs Graph Weight (Fusion Alpha)</span>
+                                <span className="text-cyan-400 font-mono">{config.fusionAlpha}</span>
+                            </div>
+                            <input 
+                                type="range" 
+                                min="0" 
+                                max="1" 
+                                step="0.05"
+                                value={config.fusionAlpha}
+                                onChange={(e) => handleChange('fusionAlpha', parseFloat(e.target.value))}
+                                className="w-full accent-cyan-400 bg-slate-800 rounded-lg cursor-pointer"
+                            />
+                            <div className="flex justify-between text-[10px] text-slate-500">
+                                <span>100% Vector Search</span>
+                                <span>Balanced</span>
+                                <span>100% Graph Traversal</span>
+                            </div>
+                        </div>
+
+                        <button 
+                            type="submit"
+                            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs transition-all shadow-lg shadow-cyan-950/50"
+                        >
+                            Save Settings
+                        </button>
+                    </form>
+                </div>
+            );
+        };
+
+        // --- ADD NODE MODAL ---
+        const AddNodeModal = ({ nodes, onClose, onAdd }) => {
+            const [label, setLabel] = useState('');
+            const [type, setType] = useState('entity');
+            const [desc, setDesc] = useState('');
+            const [targetNodeId, setTargetNodeId] = useState('');
+            const [edgeLabel, setEdgeLabel] = useState('relates_to');
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (!label.trim()) return;
+
+                const colorMap = {
+                    ckg: '#38bdf8',
+                    entity: '#10b981',
+                    context: '#6366f1',
+                    temporal: '#a855f7',
+                    spatial: '#f59e0b',
+                    topical: '#ec4899',
+                };
+
+                const newNode = {
+                    id: `n_${Date.now()}`,
+                    label,
+                    type,
+                    val: 18,
+                    color: colorMap[type] || '#38bdf8',
+                    desc: desc || 'Custom created node payload.',
+                    metrics: { created: 'Just now', source: 'Manual Entry' }
+                };
+
+                onAdd(newNode, targetNodeId ? { target: targetNodeId, label: edgeLabel } : null);
+                onClose();
+            };
+
+            return (
+                <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+                    <div className="glass-panel w-full max-w-md p-6 rounded-2xl border border-slate-700 shadow-2xl animate-fade-in space-y-4">
+                        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <h3 className="text-base font-bold text-white">Add Graph Node</h3>
+                            <button onClick={onClose} className="text-slate-400 hover:text-white" aria-label="Close modal">
+                                <i className="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-medium text-slate-300 mb-1">Node Title / Label</label>
+                                <input 
+                                    type="text" 
+                                    required 
+                                    placeholder="e.g. Market Expansion Strategy"
+                                    value={label}
+                                    onChange={e => setLabel(e.target.value)}
+                                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-medium text-slate-300 mb-1">Node Type</label>
+                                <select 
+                                    value={type} 
+                                    onChange={e => setType(e.target.value)}
+                                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"
+                                >
+                                    <option value="entity">Entity Node</option>
+                                    <option value="ckg">CKG Core</option>
+                                    <option value="context">Context Layer</option>
+                                    <option value="temporal">Temporal</option>
+                                    <option value="spatial">Spatial</option>
+                                    <option value="topical">Topical</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-medium text-slate-300 mb-1">Description</label>
+                                <textarea 
+                                    rows="2"
+                                    placeholder="Describe node relationships or context details..."
+                                    value={desc}
+                                    onChange={e => setDesc(e.target.value)}
+                                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"
+                                ></textarea>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-800">
+                                <div>
+                                    <label className="block text-xs font-medium text-slate-300 mb-1">Connect To Node</label>
+                                    <select 
+                                        value={targetNodeId} 
+                                        onChange={e => setTargetNodeId(e.target.value)}
+                                        className="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"
+                                    >
+                                        <option value="">None (Standalone)</option>
+                                        {nodes.map(n => (
+                                            <option key={n.id} value={n.id}>{n.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-medium text-slate-300 mb-1">Edge Relationship</label>
+                                    <input 
+                                        type="text" 
+                                        value={edgeLabel}
+                                        onChange={e => setEdgeLabel(e.target.value)}
+                                        className="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex gap-2 pt-3">
+                                <button 
+                                    type="button" 
+                                    onClick={onClose}
+                                    className="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium"
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    type="submit"
+                                    className="flex-1 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs"
+                                >
+                                    Create Node
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- INGESTION MODAL COMPONENT ---
+        const IngestionModal = ({ onClose, onIngest }) => {
+            const [graphCategory, setGraphCategory] = useState('ckg'); // 'ckg', 'context', 'entity'
+            const [format, setFormat] = useState('json'); // 'json', 'csv', 'cypher'
+            const [inputText, setInputText] = useState('');
+            const [parsedPreview, setParsedPreview] = useState({ nodes: [], edges: [], error: null });
+
+            // Sample Templates for quick testing
+            const templates = {
+                ckg: {
+                    json: `{\n  "nodes": [\n    { "id": "ckg_10", "label": "Macro Economic Index", "type": "ckg", "desc": "Aggregated global economic indicator" }\n  ],\n  "edges": [\n    { "source": "ckg_10", "target": "n2", "label": "influences", "weight": 0.88 }\n  ]\n}`,
+                    csv: `id,label,type,desc\nckg_11,Energy Sector Vector,ckg,Core sector index for oil & renewable trends\n---edges---\nsource,target,label,weight\nckg_11,n5,correlates,0.82`,
+                    cypher: `CREATE (n:CKG {id: 'ckg_12', label: 'Supply Chain Model', desc: 'Logistics graph node'})\nCREATE (n)-[:IMPACTS {weight: 0.9}]->(n2)`
+                },
+                context: {
+                    json: `{\n  "nodes": [\n    { "id": "ctx_temporal_2027", "label": "FY 2027 Projections", "type": "temporal", "desc": "Forward time dimension node" }\n  ],\n  "edges": [\n    { "source": "ctx_temporal_2027", "target": "n3", "label": "succeeds", "weight": 0.95 }\n  ]\n}`,
+                    csv: `id,label,type,desc\nctx_spat_1,APAC Region,spatial,Asia Pacific regional context\n---edges---\nsource,target,label,weight\nctx_spat_1,n4,adjacent,0.75`,
+                    cypher: `CREATE (c:Context {id: 'ctx_top_1', label: 'Robotics Trend', type: 'topical', desc: 'AI Subfield'})\nCREATE (c)-[:CATEGORIZES]->(n6)`
+                },
+                entity: {
+                    json: `{\n  "nodes": [\n    { "id": "ent_corp_1", "label": "Nvidia Corp", "type": "entity", "desc": "Hardware & Semiconductor Vendor" }\n  ],\n  "edges": [\n    { "source": "ent_corp_1", "target": "n6", "label": "leads_market", "weight": 0.97 }\n  ]\n}`,
+                    csv: `id,label,type,desc\nent_person_1,CEO Statement,entity,Primary executive quote source\n---edges---\nsource,target,label,weight\nent_person_1,n1,authored,0.9`,
+                    cypher: `CREATE (e:Entity {id: 'ent_doc_1', label: 'Q3 Earnings Call Transcripts', desc: 'Source audio transcript'})\nCREATE (e)-[:ATTACHED_TO]->(n2)`
+                }
+            };
+
+            // Auto load sample code on type/format switch
+            useEffect(() => {
+                setInputText(templates[graphCategory][format]);
+            }, [graphCategory, format]);
+
+            // Live Parser
+            useEffect(() => {
+                if (!inputText.trim()) {
+                    setParsedPreview({ nodes: [], edges: [], error: null });
+                    return;
+                }
+
+                try {
+                    let newNodes = [];
+                    let newEdges = [];
+
+                    if (format === 'json') {
+                        const parsed = JSON.parse(inputText);
+                        const rawNodes = parsed.nodes || (Array.isArray(parsed) ? parsed : []);
+                        const rawEdges = parsed.edges || [];
+
+                        const colorMap = { ckg: '#38bdf8', entity: '#10b981', context: '#6366f1', temporal: '#a855f7', spatial: '#f59e0b', topical: '#ec4899' };
+
+                        newNodes = rawNodes.map((n, i) => ({
+                            id: n.id || `node_imp_${Date.now()}_${i}`,
+                            label: n.label || 'Imported Node',
+                            type: n.type || (graphCategory === 'context' ? 'temporal' : graphCategory),
+                            color: colorMap[n.type] || colorMap[graphCategory] || '#38bdf8',
+                            val: 16,
+                            desc: n.desc || `Imported under ${graphCategory.toUpperCase()} graph schema.`,
+                            metrics: { source: `${graphCategory.toUpperCase()} JSON-LD`, status: 'Ingested' }
+                        }));
+
+                        newEdges = rawEdges.map((e, i) => ({
+                            id: e.id || `edge_imp_${Date.now()}_${i}`,
+                            source: e.source,
+                            target: e.target,
+                            label: e.label || 'linked_to',
+                            weight: e.weight || 0.8
+                        }));
+                    } else if (format === 'csv') {
+                        const parts = inputText.split('---edges---');
+                        const nodeLines = parts[0].trim().split('\n').slice(1); // skip header
+                        const edgeLines = parts[1] ? parts[1].trim().split('\n').slice(1) : [];
+
+                        const colorMap = { ckg: '#38bdf8', entity: '#10b981', context: '#6366f1', temporal: '#a855f7', spatial: '#f59e0b', topical: '#ec4899' };
+
+                        newNodes = nodeLines.map((line, i) => {
+                            const [id, label, type, desc] = line.split(',');
+                            const nodeType = type || (graphCategory === 'context' ? 'temporal' : graphCategory);
+                            return {
+                                id: id?.trim() || `csv_n_${i}`,
+                                label: label?.trim() || `CSV Node ${i}`,
+                                type: nodeType,
+                                color: colorMap[nodeType] || colorMap[graphCategory] || '#38bdf8',
+                                val: 16,
+                                desc: desc?.trim() || 'CSV Table Ingestion',
+                                metrics: { source: 'CSV Table' }
+                            };
+                        });
+
+                        newEdges = edgeLines.map((line, i) => {
+                            const [source, target, label, weight] = line.split(',');
+                            return {
+                                id: `csv_e_${i}`,
+                                source: source?.trim(),
+                                target: target?.trim(),
+                                label: label?.trim() || 'relates',
+                                weight: parseFloat(weight) || 0.8
+                            };
+                        });
+                    } else if (format === 'cypher') {
+                        // Regex match simple Cypher CREATE patterns
+                        const nodeMatches = [...inputText.matchAll(/CREATE\s*\(([^:]+):?([^\s{]*)\s*\{([^}]+)\}\)/gi)];
+                        const colorMap = { ckg: '#38bdf8', entity: '#10b981', context: '#6366f1', temporal: '#a855f7', spatial: '#f59e0b', topical: '#ec4899' };
+
+                        newNodes = nodeMatches.map((m, i) => {
+                            const propsStr = m[3];
+                            const idMatch = propsStr.match(/id:\s*['"]([^'"]+)['"]/);
+                            const labelMatch = propsStr.match(/label:\s*['"]([^'"]+)['"]/);
+                            const descMatch = propsStr.match(/desc:\s*['"]([^'"]+)['"]/);
+
+                            const nodeType = graphCategory === 'context' ? 'temporal' : graphCategory;
+                            return {
+                                id: idMatch ? idMatch[1] : `cypher_n_${i}`,
+                                label: labelMatch ? labelMatch[1] : 'Cypher Node',
+                                type: nodeType,
+                                color: colorMap[nodeType] || '#38bdf8',
+                                val: 16,
+                                desc: descMatch ? descMatch[1] : 'Cypher Query Extraction',
+                                metrics: { source: 'Cypher Query' }
+                            };
+                        });
+
+                        // Regex match simple Cypher relationships
+                        const edgeMatches = [...inputText.matchAll(/\(([^)]+)\)-\[:([^\]\s]+)\s*\{?([^}]*)\}?\]->\(([^)]+)\)/gi)];
+                        newEdges = edgeMatches.map((m, i) => ({
+                            id: `cypher_e_${i}`,
+                            source: m[1].trim(),
+                            target: m[4].trim(),
+                            label: m[2].trim(),
+                            weight: 0.85
+                        }));
+                    }
+
+                    setParsedPreview({ nodes: newNodes, edges: newEdges, error: null });
+                } catch (err) {
+                    setParsedPreview({ nodes: [], edges: [], error: err.message });
+                }
+            }, [inputText, format, graphCategory]);
+
+            const handleFileUpload = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (event) => setInputText(event.target.result);
+                reader.readAsText(file);
+            };
+
+            const confirmIngestion = () => {
+                if (parsedPreview.error || parsedPreview.nodes.length === 0) return;
+                onIngest(parsedPreview.nodes, parsedPreview.edges);
+                onClose();
+            };
+
+            return (
+                <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+                    <div className="glass-panel w-full max-w-3xl p-6 rounded-2xl border border-slate-700 shadow-2xl animate-fade-in flex flex-col gap-5 max-h-[90vh]">
+                        {/* Modal Header */}
+                        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <div className="flex items-center gap-2.5">
+                                <div className="p-2 bg-cyan-500/20 text-cyan-400 rounded-xl border border-cyan-500/30">
+                                    <i className="fa-solid fa-file-import text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 className="text-base font-bold text-white">Ingest Graph Data</h3>
+                                    <p className="text-xs text-slate-400">Import structured dataset into specific graph categories</p>
+                                </div>
+                            </div>
+                            <button onClick={onClose} className="text-slate-400 hover:text-white" aria-label="Close modal">
+                                <i className="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+
+                        {/* Step 1: Select Graph Category & Format */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Target Graph Type</label>
+                                <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-900 rounded-xl border border-slate-800">
+                                    {[
+                                        { id: 'ckg', label: 'CKG Core', icon: 'fa-network-wired' },
+                                        { id: 'context', label: 'Context', icon: 'fa-layer-group' },
+                                        { id: 'entity', label: 'Entity', icon: 'fa-database' },
+                                    ].map(cat => (
+                                        <button
+                                            key={cat.id}
+                                            onClick={() => setGraphCategory(cat.id)}
+                                            className={`py-2 px-2 rounded-lg text-xs font-medium transition-all flex flex-col items-center gap-1 ${
+                                                graphCategory === cat.id
+                                                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+                                                    : 'text-slate-400 hover:text-slate-200'
+                                            }`}
+                                        >
+                                            <i className={`fa-solid ${cat.icon}`}></i>
+                                            {cat.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Data Format</label>
+                                <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-900 rounded-xl border border-slate-800">
+                                    {[
+                                        { id: 'json', label: 'JSON / LD' },
+                                        { id: 'csv', label: 'CSV Table' },
+                                        { id: 'cypher', label: 'Cypher' },
+                                    ].map(fmt => (
+                                        <button
+                                            key={fmt.id}
+                                            onClick={() => setFormat(fmt.id)}
+                                            className={`py-2 px-2 rounded-lg text-xs font-medium transition-all text-center ${
+                                                format === fmt.id
+                                                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
+                                                    : 'text-slate-400 hover:text-slate-200'
+                                            }`}
+                                        >
+                                            {fmt.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Input Code / File Drop Container */}
+                        <div className="space-y-2 flex-1 flex flex-col min-h-0">
+                            <div className="flex justify-between items-center text-xs">
+                                <span className="font-semibold text-slate-300 uppercase tracking-wider">Raw Input Code or File Upload</span>
+                                <label className="text-cyan-400 hover:underline cursor-pointer flex items-center gap-1">
+                                    <i className="fa-solid fa-upload"></i> Upload File
+                                    <input type="file" onChange={handleFileUpload} accept=".json,.csv,.txt,.cypher" className="hidden" />
+                                </label>
+                            </div>
+                            <textarea 
+                                value={inputText}
+                                onChange={e => setInputText(e.target.value)}
+                                rows="6"
+                                placeholder="Paste JSON, CSV, or Cypher snippet..."
+                                className="w-full bg-slate-900/90 font-mono text-xs text-cyan-300 p-3 rounded-xl border border-slate-700 focus:outline-none focus:border-cyan-500 flex-1 resize-none"
+                            ></textarea>
+                        </div>
+
+                        {/* Live Parser Indicator & Schema Mapping Preview */}
+                        <div className="bg-slate-900/80 p-3 rounded-xl border border-slate-800 space-y-2">
+                            <div className="flex justify-between items-center text-xs">
+                                <span className="font-semibold text-slate-300 flex items-center gap-2">
+                                    <i className="fa-solid fa-list-check text-cyan-400"></i>
+                                    Schema Mapping Validation
+                                </span>
+                                {parsedPreview.error ? (
+                                    <span className="text-xs text-rose-400 font-semibold flex items-center gap-1">
+                                        <i className="fa-solid fa-circle-exclamation"></i> Parse Error
+                                    </span>
+                                ) : (
+                                    <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1">
+                                        <i className="fa-solid fa-circle-check"></i> Validated ({parsedPreview.nodes.length} Nodes, {parsedPreview.edges.length} Edges)
+                                    </span>
+                                )}
+                            </div>
+
+                            {parsedPreview.error ? (
+                                <p className="text-xs text-rose-300 font-mono bg-rose-950/40 p-2 rounded-lg border border-rose-900">{parsedPreview.error}</p>
+                            ) : (
+                                <div className="flex gap-2 flex-wrap">
+                                    {parsedPreview.nodes.map((n, idx) => (
+                                        <span key={idx} className="text-[10px] px-2 py-1 rounded-md bg-slate-800 text-slate-300 border border-slate-700 flex items-center gap-1">
+                                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: n.color }}></span>
+                                            {n.label} ({n.type})
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex gap-2">
+                            <button 
+                                onClick={onClose}
+                                className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                onClick={confirmIngestion}
+                                disabled={parsedPreview.error || parsedPreview.nodes.length === 0}
+                                className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                            >
+                                Ingest {parsedPreview.nodes.length} Nodes into Graph
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- EXPORT MODAL COMPONENT ---
+        const ExportModal = ({ nodes, edges, onClose, showToast }) => {
+            const [exportScope, setExportScope] = useState('all'); // 'all', 'ckg', 'context', 'entity'
+            const [exportFormat, setExportFormat] = useState('json'); // 'json', 'csv', 'cypher', 'svg'
+            const [incMetadata, setIncMetadata] = useState(true);
+            const [incEmbeddings, setIncEmbeddings] = useState(true);
+
+            // Filter nodes by chosen scope
+            const targetNodes = useMemo(() => {
+                if (exportScope === 'all') return nodes;
+                if (exportScope === 'context') {
+                    return nodes.filter(n => ['context', 'temporal', 'spatial', 'topical'].includes(n.type));
+                }
+                return nodes.filter(n => n.type === exportScope);
+            }, [nodes, exportScope]);
+
+            const targetNodeIds = useMemo(() => new Set(targetNodes.map(n => n.id)), [targetNodes]);
+
+            const targetEdges = useMemo(() => {
+                return edges.filter(e => targetNodeIds.has(e.source) && targetNodeIds.has(e.target));
+            }, [edges, targetNodeIds]);
+
+            // Format Output Generator
+            const generatedExportText = useMemo(() => {
+                if (exportFormat === 'json') {
+                    const payload = {
+                        schema: "Nexus CKG Engine v2.5",
+                        targetType: exportScope,
+                        exportedAt: new Date().toISOString(),
+                        nodes: targetNodes.map(n => {
+                            const nodeObj = { id: n.id, label: n.label, type: n.type, desc: n.desc };
+                            if (incMetadata) nodeObj.metrics = n.metrics;
+                            if (incEmbeddings) nodeObj.vectorDimensions = 1536;
+                            return nodeObj;
+                        }),
+                        edges: targetEdges
+                    };
+                    return JSON.stringify(payload, null, 2);
+                } else if (exportFormat === 'csv') {
+                    let csv = `id,label,type,desc\n`;
+                    targetNodes.forEach(n => {
+                        csv += `"${n.id}","${n.label}","${n.type}","${n.desc}"\n`;
+                    });
+                    csv += `\n---edges---\nsource,target,label,weight\n`;
+                    targetEdges.forEach(e => {
+                        csv += `"${e.source}","${e.target}","${e.label}",${e.weight}\n`;
+                    });
+                    return csv;
+                } else if (exportFormat === 'cypher') {
+                    let cypher = `// Nexus CKG Export Script - Target: ${exportScope.toUpperCase()}\n`;
+                    targetNodes.forEach(n => {
+                        cypher += `CREATE (:${n.type.toUpperCase()} {id: '${n.id}', label: '${n.label}', desc: '${n.desc}'})\n`;
+                    });
+                    targetEdges.forEach(e => {
+                        cypher += `MATCH (a {id: '${e.source}'}), (b {id: '${e.target}'}) CREATE (a)-[:${e.label.toUpperCase()} {weight: ${e.weight}}]->(b)\n`;
+                    });
+                    return cypher;
+                } else if (exportFormat === 'svg') {
+                    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="100%" height="100%">
+  <!-- Nexus CKG Engine SVG Export - Scope: ${exportScope} -->
+  <rect width="800" height="600" fill="#05070e" />
+  ${targetNodes.map((n, i) => `<circle cx="${100 + (i * 80) % 700}" cy="${100 + Math.floor((i * 80) / 700) * 100}" r="20" fill="${n.color}" />`).join('\n  ')}
+</svg>`;
+                }
+                return '';
+            }, [targetNodes, targetEdges, exportFormat, exportScope, incMetadata, incEmbeddings]);
+
+            const copyToClipboard = () => {
+                const textarea = document.createElement('textarea');
+                textarea.value = generatedExportText;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast("Copied graph dataset to clipboard.");
+            };
+
+            const downloadFile = () => {
+                const extensions = { json: 'json', csv: 'csv', cypher: 'cypher', svg: 'svg' };
+                const blob = new Blob([generatedExportText], { type: 'text/plain;charset=utf-8' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `nexus_ckg_${exportScope}_export.${extensions[exportFormat]}`;
+                link.click();
+                showToast("Export file download started.");
+            };
+
+            return (
+                <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+                    <div className="glass-panel w-full max-w-3xl p-6 rounded-2xl border border-slate-700 shadow-2xl animate-fade-in flex flex-col gap-5 max-h-[90vh]">
+                        {/* Modal Header */}
+                        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <div className="flex items-center gap-2.5">
+                                <div className="p-2 bg-purple-500/20 text-purple-300 rounded-xl border border-purple-500/30">
+                                    <i className="fa-solid fa-file-export text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 className="text-base font-bold text-white">Export Graph Dataset</h3>
+                                    <p className="text-xs text-slate-400">Export selected graph types into standard data formats</p>
+                                </div>
+                            </div>
+                            <button onClick={onClose} className="text-slate-400 hover:text-white" aria-label="Close modal">
+                                <i className="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+
+                        {/* Filters & Options */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Target Scope</label>
+                                <select 
+                                    value={exportScope}
+                                    onChange={e => setExportScope(e.target.value)}
+                                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-purple-500"
+                                >
+                                    <option value="all">Full Combined Graph (All Types)</option>
+                                    <option value="ckg">CKG Core Knowledge Graph Only</option>
+                                    <option value="context">Context Dimensions Only (Temporal/Spatial)</option>
+                                    <option value="entity">Entity Graph Only</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Export Format</label>
+                                <div className="grid grid-cols-4 gap-1 p-1 bg-slate-900 rounded-xl border border-slate-800">
+                                    {[
+                                        { id: 'json', label: 'JSON-LD' },
+                                        { id: 'csv', label: 'CSV' },
+                                        { id: 'cypher', label: 'Cypher' },
+                                        { id: 'svg', label: 'SVG' },
+                                    ].map(fmt => (
+                                        <button
+                                            key={fmt.id}
+                                            onClick={() => setExportFormat(fmt.id)}
+                                            className={`py-1.5 px-1 rounded-lg text-xs font-medium text-center transition-all ${
+                                                exportFormat === fmt.id
+                                                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
+                                                    : 'text-slate-400 hover:text-slate-200'
+                                            }`}
+                                        >
+                                            {fmt.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Toggles */}
+                        <div className="flex flex-wrap gap-4 text-xs text-slate-300 bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input 
+                                    type="checkbox" 
+                                    checked={incMetadata}
+                                    onChange={e => setIncMetadata(e.target.checked)}
+                                    className="accent-purple-500 rounded"
+                                />
+                                Include Node Metrics & Attributes
+                            </label>
+
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input 
+                                    type="checkbox" 
+                                    checked={incEmbeddings}
+                                    onChange={e => setIncEmbeddings(e.target.checked)}
+                                    className="accent-purple-500 rounded"
+                                />
+                                Include Vector Dimension Indices
+                            </label>
+                        </div>
+
+                        {/* Export Code Preview */}
+                        <div className="space-y-1 flex-1 flex flex-col min-h-0">
+                            <div className="flex justify-between items-center text-xs text-slate-400">
+                                <span>Preview ({targetNodes.length} Nodes, {targetEdges.length} Edges)</span>
+                                <button onClick={copyToClipboard} className="text-cyan-400 hover:underline flex items-center gap-1">
+                                    <i className="fa-solid fa-copy"></i> Copy Raw
+                                </button>
+                            </div>
+                            <textarea 
+                                readOnly
+                                value={generatedExportText}
+                                rows="7"
+                                className="w-full bg-slate-900 font-mono text-xs text-purple-300 p-3 rounded-xl border border-slate-700 focus:outline-none flex-1 resize-none"
+                            ></textarea>
+                        </div>
+
+                        {/* Modal Action Buttons */}
+                        <div className="flex gap-2">
+                            <button 
+                                onClick={onClose}
+                                className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+                            >
+                                Close
+                            </button>
+                            <button 
+                                onClick={downloadFile}
+                                className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md flex items-center justify-center gap-2"
+                            >
+                                <i className="fa-solid fa-download"></i>
+                                Download Export File
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Render React Application
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
