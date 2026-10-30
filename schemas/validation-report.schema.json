@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/validation-report.schema.json",
+  "title": "Nexus normalization and validation report",
+  "type": "object",
+  "required": ["valid", "errors", "warnings", "checks"],
+  "properties": {
+    "valid": { "type": "boolean" },
+    "errors": { "type": "array", "items": { "$ref": "#/$defs/issue" } },
+    "warnings": { "type": "array", "items": { "$ref": "#/$defs/issue" } },
+    "checks": { "type": "array", "items": { "type": "string" } },
+    "normalizedRecordType": { "type": ["string", "null"] },
+    "schemaVersion": { "type": ["string", "null"] }
+  },
+  "additionalProperties": false,
+  "$defs": { "issue": { "type": "object", "required": ["code", "message"], "properties": {
+    "code": { "type": "string", "minLength": 1 },
+    "message": { "type": "string", "minLength": 1 },
+    "path": { "type": ["string", "null"] },
+    "severity": { "enum": ["error", "warning"] }
+  }, "additionalProperties": false } }
+}

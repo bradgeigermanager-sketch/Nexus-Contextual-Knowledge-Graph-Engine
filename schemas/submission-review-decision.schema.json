@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/submission-review-decision.schema.json",
+  "title": "Nexus submission review decision",
+  "type": "object",
+  "required": [
+    "schema",
+    "decisionId",
+    "submissionId",
+    "candidateFingerprint",
+    "corpusSnapshotId",
+    "reviewer",
+    "decidedAt",
+    "decision",
+    "rationale"
+  ],
+  "properties": {
+    "schema": {
+      "const": "nexus-review-decision/v1"
+    },
+    "decisionId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "submissionId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "candidateFingerprint": {
+      "type": "object",
+      "required": [
+        "algorithm",
+        "value"
+      ],
+      "properties": {
+        "algorithm": {
+          "const": "fnv1a-32"
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{8}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "corpusSnapshotId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reviewer": {
+      "type": "object",
+      "required": [
+        "subject"
+      ],
+      "properties": {
+        "subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "decidedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "decision": {
+      "enum": [
+        "accept",
+        "reject",
+        "request_more_evidence",
+        "defer"
+      ]
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 3
+    },
+    "followUp": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "evidenceRefs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "refType",
+          "refId"
+        ],
+        "properties": {
+          "refType": {
+            "type": "string",
+            "minLength": 1
+          },
+          "refId": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "const": "request_more_evidence"
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "then": {
+        "required": [
+          "followUp"
+        ]
+      }
+    }
+  ],
+  "additionalProperties": false
+}

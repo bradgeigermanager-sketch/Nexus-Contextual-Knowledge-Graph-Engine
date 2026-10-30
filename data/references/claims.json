@@ -1,0 +1,35 @@
+{
+  "schema": "nexus-reference-claims/v1",
+  "claims": [
+    {
+      "claimId": "claim-example-001",
+      "statement": "In this synthetic graph, the Financial Report node has a has_topic edge to the Revenue Growth node.",
+      "subject": {
+        "kind": "graph_node",
+        "nodeId": "n2"
+      },
+      "predicate": "has_topic",
+      "object": {
+        "kind": "graph_node",
+        "nodeId": "n5"
+      },
+      "target": {
+        "kind": "path",
+        "sourceNodeId": "n2",
+        "edgeId": "e4",
+        "targetNodeId": "n5"
+      },
+      "qualifiers": {
+        "time": null,
+        "place": null,
+        "scope": "synthetic demonstration graph"
+      },
+      "status": "proposed",
+      "assertedBy": "nexus-demo-fixture",
+      "createdAt": "2026-10-28T00:00:00Z",
+      "supersedes": [],
+      "synthetic": true,
+      "note": "This claim describes the structure of the included synthetic graph only; it is not a real-world factual claim."
+    }
+  ]
+}

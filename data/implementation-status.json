@@ -1,0 +1,130 @@
+{
+  "schema": "nexus-implementation-registry/v1",
+  "updatedAt": "2026-10-28",
+  "statusDefinitions": {
+    "implemented": "Present in repository and usable for the described scope; tests or runtime evidence should still be checked.",
+    "partial": "Implemented in a limited scope with documented constraints.",
+    "planned": "Not implemented yet.",
+    "unverified": "Configured or present, but the current runtime/deployment behavior has not been confirmed."
+  },
+  "features": [
+    {
+      "id": "submission-preview",
+      "name": "JSON/JSONL submission validation and conflict-aware staging",
+      "status": "implemented",
+      "evidence": [
+        "src/submission-contracts.js",
+        "src/submission-import.js",
+        "src/submission-staging.js",
+        "site/portal.html"
+      ],
+      "notes": "Shared importer, normalizer, and conflict-aware staging run in the browser bundle; provenance retained; dry-run only, no persistence or authorization."
+    },
+    {
+      "id": "shared-browser-modules",
+      "name": "Shared query, staging, and review modules bundled for static portal",
+      "status": "implemented",
+      "evidence": [
+        "scripts/build-pages.js",
+        "src/neural-artifact-query.js",
+        "src/neural-artifact-traversal.js",
+        "src/submission-import.js",
+        "src/submission-review.js"
+      ],
+      "notes": "Pages build bundles repository modules without a runtime server; build fails on invalid corpus."
+    },
+    {
+      "id": "submission-review",
+      "name": "Grouped candidate review summaries and snapshot-bound decision validation",
+      "status": "partial",
+      "evidence": [
+        "src/submission-review.js",
+        "schemas/submission-review-decision.schema.json",
+        "test/submission-review.test.js",
+        "docs/submission-review.md"
+      ],
+      "notes": "Groups staging statuses, exposes a local decision-draft form, and validates candidate fingerprint plus supplied corpus snapshot ID; reviewer identity is not authenticated and decisions are not persisted."
+    },
+    {
+      "id": "pages-site",
+      "name": "Static GitHub Pages landing and documentation site",
+      "status": "unverified",
+      "evidence": [
+        "site/index.html",
+        "site/docs.html",
+        ".github/workflows/pages.yml"
+      ],
+      "notes": "Workflow is configured; public deployment must be verified after merge to main and Pages settings."
+    },
+    {
+      "id": "portal-ui",
+      "name": "Browser portal for graph search, relationships, source/evidence, submission preview, and endpoint registry",
+      "status": "partial",
+      "evidence": [
+        "site/portal.html"
+      ],
+      "notes": "Read-only static client; lexical search, shared bounded traversal, shared JSON/JSONL staging, and grouped review classifications."
+    },
+    {
+      "id": "graph-archive",
+      "name": "Versioned graph archive",
+      "status": "implemented",
+      "evidence": [
+        "data/canonical/graph.json",
+        "docs/graph-data-contract.md"
+      ],
+      "notes": "Synthetic demonstration graph; not verified real-world facts."
+    },
+    {
+      "id": "corpus-loader",
+      "name": "Graph, source, claim, evidence, and artifact corpus loader",
+      "status": "implemented",
+      "evidence": [
+        "src/neural-artifact-corpus.js",
+        "src/neural-artifact-validation.js"
+      ],
+      "notes": "Validation establishes structure and references, not factual truth."
+    },
+    {
+      "id": "bounded-traversal",
+      "name": "Bounded typed traversal and query API",
+      "status": "implemented",
+      "evidence": [
+        "src/neural-artifact-traversal.js",
+        "src/neural-artifact-query.js"
+      ],
+      "notes": "Deterministic traversal, not semantic search or truth ranking."
+    },
+    {
+      "id": "web-endpoints",
+      "name": "Curated outbound endpoint profiles and bounded client",
+      "status": "partial",
+      "evidence": [
+        "data/endpoints/registry.json",
+        "src/web-endpoint-client.js"
+      ],
+      "notes": "Profiles are configured; live connectivity and production egress controls are not verified."
+    },
+    {
+      "id": "semantic-search",
+      "name": "Embedding-backed semantic search",
+      "status": "planned",
+      "evidence": [],
+      "notes": "No embedding model or vector index is wired into this repository."
+    },
+    {
+      "id": "persistent-submissions",
+      "name": "Authorized persistent submission service",
+      "status": "planned",
+      "evidence": [],
+      "notes": "Requires server-side authentication, authorization, conflict handling, audit log, and durable storage."
+    },
+    {
+      "id": "live-endpoint-health",
+      "name": "Scheduled live endpoint health checks",
+      "status": "planned",
+      "evidence": [],
+      "notes": "Configured endpoint profiles do not imply current reachability."
+    }
+  ]
+}

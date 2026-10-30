@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/node-submission.schema.json",
+  "title": "Nexus node candidate submission",
+  "type": "object",
+  "required": ["schema", "operation", "externalId", "node"],
+  "properties": {
+    "schema": { "const": "nexus-node-submission/v1" },
+    "operation": { "enum": ["create_candidate", "upsert_candidate", "propose_supersession"] },
+    "externalId": { "type": "string", "minLength": 1 },
+    "node": { "type": "object", "required": ["type", "label"], "properties": {
+      "type": { "type": "string", "minLength": 1 },
+      "label": { "type": "string", "minLength": 1 },
+      "description": { "type": "string" },
+      "attributes": { "type": "object" },
+      "status": { "enum": ["proposed", "active", "review_required", "disputed", "superseded", "rejected", "archived"] }
+    }, "additionalProperties": true },
+    "sourceRefs": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }
+  },
+  "additionalProperties": false
+}

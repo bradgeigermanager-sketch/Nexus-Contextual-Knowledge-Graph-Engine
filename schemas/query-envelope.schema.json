@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/query-envelope.schema.json",
+  "title": "Nexus canonical query envelope",
+  "type": "object",
+  "required": ["schema", "queryId", "intent", "start", "constraints", "output"],
+  "properties": {
+    "schema": { "const": "nexus-query/v1" },
+    "queryId": { "type": "string", "minLength": 1 },
+    "intent": { "enum": ["lookup", "traverse", "traverse_and_filter", "compare_paths", "find_relationships"] },
+    "start": { "$ref": "#/$defs/reference" },
+    "target": { "anyOf": [{ "$ref": "#/$defs/reference" }, { "type": "null" }] },
+    "filters": { "type": "object", "properties": {
+      "refTypes": { "$ref": "#/$defs/stringArray" },
+      "statuses": { "$ref": "#/$defs/stringArray" },
+      "relationshipTypes": { "$ref": "#/$defs/stringArray" },
+      "relationshipKinds": { "$ref": "#/$defs/stringArray" },
+      "contextDomains": { "$ref": "#/$defs/stringArray" }
+    }, "additionalProperties": true },
+    "constraints": { "type": "object", "properties": {
+      "maxDepth": { "type": "integer", "minimum": 0, "maximum": 32 },
+      "maxResults": { "type": "integer", "minimum": 1, "maximum": 10000 },
+      "maxPaths": { "type": "integer", "minimum": 1, "maximum": 1000 },
+      "includeEvidence": { "type": "boolean" },
+      "includeSuperseded": { "type": "boolean" }
+    }, "additionalProperties": false },
+    "output": { "type": "object", "required": ["format"], "properties": {
+      "format": { "enum": ["typed_json", "jsonl", "csv", "graphml"] },
+      "includePaths": { "type": "boolean" },
+      "includeProvenance": { "type": "boolean" },
+      "includeWarnings": { "type": "boolean" }
+    }, "additionalProperties": false },
+    "submittedAt": { "type": "string", "format": "date-time" },
+    "requesterRef": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "reference": { "type": "object", "required": ["refType", "refId"], "properties": {
+      "refType": { "enum": ["graph_node", "graph_edge", "source", "claim", "evidence_link", "artifact"] },
+      "refId": { "type": "string", "minLength": 1 }
+    }, "additionalProperties": false },
+    "stringArray": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }
+  }
+}

@@ -1,0 +1,136 @@
+{
+  "schema": "nexus-neural-artifacts/v1",
+  "dataset": "illustrative-neural-artifact-layer",
+  "synthetic": true,
+  "artifacts": [
+    {
+      "artifactId": "artifact-topic-region-example",
+      "versionId": "artifact-topic-region-example@1",
+      "artifactType": "topic_cluster",
+      "label": "Illustrative report-and-topic region",
+      "description": "Synthetic composite grouping a report node, topic node, connecting edge, and a claim as a higher-order unit.",
+      "status": "proposed",
+      "members": [
+        {
+          "refType": "graph_node",
+          "refId": "n2",
+          "role": "anchor_entity",
+          "rationale": "Synthetic graph anchor"
+        },
+        {
+          "refType": "graph_node",
+          "refId": "n5",
+          "role": "topic"
+        },
+        {
+          "refType": "graph_edge",
+          "refId": "e4",
+          "role": "relationship_under_analysis"
+        },
+        {
+          "refType": "claim",
+          "refId": "claim-example-001",
+          "role": "descriptive_claim"
+        }
+      ],
+      "context": {
+        "domain": "demonstration",
+        "timeRange": null,
+        "spatialScope": null,
+        "assumptions": [
+          "The graph is a synthetic fixture."
+        ],
+        "inclusionCriteria": [
+          "Explicitly selected graph objects"
+        ],
+        "exclusions": []
+      },
+      "features": [
+        {
+          "name": "membership_count",
+          "value": 4,
+          "valueType": "integer",
+          "meaning": "Number of explicit member references"
+        }
+      ],
+      "derivation": {
+        "method": "curated_fixture",
+        "algorithm": null,
+        "model": null,
+        "modelVersion": null,
+        "parameters": {},
+        "inputSnapshots": [
+          "initial-application-seed-graph",
+          "illustrative-reference-evidence-corpus"
+        ],
+        "runId": null,
+        "createdAt": "2026-10-28T00:00:00Z"
+      },
+      "evidenceRefs": [
+        "evidence-example-001"
+      ],
+      "supersedes": [],
+      "createdAt": "2026-10-28T00:00:00Z",
+      "createdBy": "repository-fixture",
+      "synthetic": true
+    },
+    {
+      "artifactId": "artifact-evidence-bundle-example",
+      "versionId": "artifact-evidence-bundle-example@1",
+      "artifactType": "evidence_bundle",
+      "label": "Illustrative evidence bundle",
+      "description": "Synthetic grouping of a claim and its linked source evidence; contains no real evidence.",
+      "status": "proposed",
+      "members": [
+        {
+          "refType": "claim",
+          "refId": "claim-example-001",
+          "role": "claim"
+        },
+        {
+          "refType": "evidence_link",
+          "refId": "evidence-example-001",
+          "role": "evidence_link"
+        },
+        {
+          "refType": "source",
+          "refId": "source-example-report-page",
+          "role": "source"
+        }
+      ],
+      "context": {
+        "domain": "demonstration",
+        "timeRange": null,
+        "spatialScope": null,
+        "assumptions": [
+          "All included records are synthetic."
+        ],
+        "inclusionCriteria": [
+          "Records linked to the example claim"
+        ],
+        "exclusions": []
+      },
+      "features": [],
+      "derivation": {
+        "method": "curated_fixture",
+        "algorithm": null,
+        "model": null,
+        "modelVersion": null,
+        "parameters": {},
+        "inputSnapshots": [
+          "illustrative-reference-evidence-corpus"
+        ],
+        "runId": null,
+        "createdAt": "2026-10-28T00:00:00Z"
+      },
+      "evidenceRefs": [
+        "evidence-example-001"
+      ],
+      "supersedes": [],
+      "createdAt": "2026-10-28T00:00:00Z",
+      "createdBy": "repository-fixture",
+      "synthetic": true
+    }
+  ],
+  "note": "These records demonstrate typed higher-order references only. They are synthetic examples, not factual assertions or a trained neural network."
+}

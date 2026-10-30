@@ -1,0 +1,139 @@
+{
+  "schema": "nexus-documentation-manifest/v1",
+  "version": "1.0.0",
+  "sourceLanguage": "en",
+  "languages": [
+    {
+      "code": "ar",
+      "title": "توثيق النظام — العربية",
+      "path": "docs/i18n/ar/system-overview.md",
+      "sections": [
+        "technical-readout",
+        "plain-language"
+      ],
+      "reviewStatus": "translation-review-recommended"
+    },
+    {
+      "code": "en",
+      "title": "System documentation — English",
+      "path": "docs/i18n/en/system-overview.md",
+      "sections": [
+        "technical-readout",
+        "plain-language"
+      ],
+      "reviewStatus": "control-version"
+    },
+    {
+      "code": "pl",
+      "title": "Dokumentacja systemu — polski",
+      "path": "docs/i18n/pl/system-overview.md",
+      "sections": [
+        "technical-readout",
+        "plain-language"
+      ],
+      "reviewStatus": "translation-review-recommended"
+    },
+    {
+      "code": "de",
+      "title": "Systemdokumentation — Deutsch",
+      "path": "docs/i18n/de/system-overview.md",
+      "sections": [
+        "technical-readout",
+        "plain-language"
+      ],
+      "reviewStatus": "translation-review-recommended"
+    },
+    {
+      "code": "fr",
+      "title": "Documentation du système — français",
+      "path": "docs/i18n/fr/system-overview.md",
+      "sections": [
+        "technical-readout",
+        "plain-language"
+      ],
+      "reviewStatus": "translation-review-recommended"
+    },
+    {
+      "code": "id",
+      "title": "Dokumentasi sistem — Bahasa Indonesia",
+      "path": "docs/i18n/id/system-overview.md",
+      "sections": [
+        "technical-readout",
+        "plain-language"
+      ],
+      "reviewStatus": "translation-review-recommended"
+    },
+    {
+      "code": "hi",
+      "title": "सिस्टम दस्तावेज़ — हिन्दी",
+      "path": "docs/i18n/hi/system-overview.md",
+      "sections": [
+        "technical-readout",
+        "plain-language"
+      ],
+      "reviewStatus": "translation-review-recommended"
+    },
+    {
+      "code": "zh",
+      "title": "系统文档 — 简体中文",
+      "path": "docs/i18n/zh/system-overview.md",
+      "sections": [
+        "technical-readout",
+        "plain-language"
+      ],
+      "reviewStatus": "translation-review-recommended"
+    },
+    {
+      "code": "ru",
+      "title": "Документация системы — русский язык",
+      "path": "docs/i18n/ru/system-overview.md",
+      "sections": [
+        "technical-readout",
+        "plain-language"
+      ],
+      "reviewStatus": "translation-review-recommended"
+    },
+    {
+      "code": "sw",
+      "title": "Nyaraka za mfumo — Kiswahili",
+      "path": "docs/i18n/sw/system-overview.md",
+      "sections": [
+        "technical-readout",
+        "plain-language"
+      ],
+      "reviewStatus": "translation-review-recommended"
+    },
+    {
+      "code": "el",
+      "title": "Τεκμηρίωση συστήματος — Ελληνικά",
+      "path": "docs/i18n/el/system-overview.md",
+      "sections": [
+        "technical-readout",
+        "plain-language"
+      ],
+      "reviewStatus": "translation-review-recommended"
+    },
+    {
+      "code": "ja",
+      "title": "システム文書 — 日本語",
+      "path": "docs/i18n/ja/system-overview.md",
+      "sections": [
+        "technical-readout",
+        "plain-language"
+      ],
+      "reviewStatus": "translation-review-recommended"
+    },
+    {
+      "code": "es",
+      "title": "Documentación del sistema — español",
+      "path": "docs/i18n/es/system-overview.md",
+      "sections": [
+        "technical-readout",
+        "plain-language"
+      ],
+      "reviewStatus": "translation-review-recommended"
+    }
+  ],
+  "maintenancePolicy": "docs/documentation-maintenance.md",
+  "index": "docs/system-documentation.md"
+}

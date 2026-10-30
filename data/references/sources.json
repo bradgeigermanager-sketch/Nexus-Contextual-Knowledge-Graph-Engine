@@ -1,0 +1,22 @@
+{
+  "schema": "nexus-reference-sources/v1",
+  "sources": [
+    {
+      "sourceId": "source-example-report-page",
+      "workId": "work-example-report",
+      "kind": "webpage",
+      "title": "Illustrative Quarterly Report",
+      "url": "https://example.org/reports/illustrative-quarterly-report",
+      "canonicalUrl": "https://example.org/reports/illustrative-quarterly-report",
+      "identifiers": [],
+      "language": "en",
+      "publicationDate": "2026-01-15",
+      "accessedAt": "2026-10-28T00:00:00Z",
+      "contentHash": null,
+      "contentHashAlgorithm": null,
+      "accessStatus": "illustrative",
+      "synthetic": true,
+      "notes": "Synthetic placeholder only. This URL and work are examples, not an actual publication."
+    }
+  ]
+}

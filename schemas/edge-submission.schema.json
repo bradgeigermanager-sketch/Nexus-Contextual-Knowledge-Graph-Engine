@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/edge-submission.schema.json",
+  "title": "Nexus edge candidate submission",
+  "type": "object",
+  "required": ["schema", "operation", "externalId", "edge"],
+  "properties": {
+    "schema": { "const": "nexus-edge-submission/v1" },
+    "operation": { "enum": ["create_candidate", "upsert_candidate", "propose_supersession"] },
+    "externalId": { "type": "string", "minLength": 1 },
+    "edge": { "type": "object", "required": ["source", "target", "relationshipType"], "properties": {
+      "source": { "$ref": "#/$defs/reference" },
+      "target": { "$ref": "#/$defs/reference" },
+      "relationshipType": { "type": "string", "minLength": 1 },
+      "directionality": { "enum": ["directed", "undirected", "symmetric"] },
+      "attributes": { "type": "object" },
+      "evidenceRefs": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+      "status": { "enum": ["proposed", "active", "review_required", "disputed", "superseded", "rejected", "archived"] }
+    }, "additionalProperties": true }
+  },
+  "additionalProperties": false,
+  "$defs": { "reference": { "type": "object", "required": ["refType", "refId"], "properties": {
+    "refType": { "enum": ["graph_node", "graph_edge", "source", "claim", "evidence_link", "artifact"] },
+    "refId": { "type": "string", "minLength": 1 }
+  }, "additionalProperties": false } }
+}

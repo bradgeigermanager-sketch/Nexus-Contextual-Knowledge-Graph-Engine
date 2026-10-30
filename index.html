@@ -156,20 +156,32 @@
             ragStrategy: 'hybrid-vector-graph'
         };
 
+
+        const validateGraphData = (nodes, edges) => {
+            const errors = [];
+            if (!Array.isArray(nodes) || !Array.isArray(edges)) return {valid:false,errors:['Nodes and edges must be arrays.']};
+            const ids = new Set();
+            nodes.forEach((n,i)=>{if(!n||typeof n!=='object'||Array.isArray(n)){errors.push(`Node ${i+1} must be an object.`);return;}if(typeof n.id!=='string'||!n.id.trim())errors.push(`Node ${i+1} needs an ID.`);else if(ids.has(n.id))errors.push(`Duplicate node ID: ${n.id}`);else ids.add(n.id);if(typeof n.label!=='string'||!n.label.trim())errors.push(`Node ${n.id||i+1} needs a label.`);if(n.val!==undefined&&(typeof n.val!=='number'||!Number.isFinite(n.val)||n.val<0))errors.push(`Node ${n.id||i+1} has invalid val.`);});
+            const edgeIds=new Set();
+            edges.forEach((e,i)=>{if(!e||typeof e!=='object'||Array.isArray(e)){errors.push(`Edge ${i+1} must be an object.`);return;}if(typeof e.id!=='string'||!e.id.trim())errors.push(`Edge ${i+1} needs an ID.`);else if(edgeIds.has(e.id))errors.push(`Duplicate edge ID: ${e.id}`);else edgeIds.add(e.id);if(typeof e.source!=='string'||!ids.has(e.source))errors.push(`Edge ${e.id||i+1} has missing source: ${e.source}`);if(typeof e.target!=='string'||!ids.has(e.target))errors.push(`Edge ${e.id||i+1} has missing target: ${e.target}`);if(e.weight!==undefined&&(typeof e.weight!=='number'||!Number.isFinite(e.weight)||e.weight<0||e.weight>1))errors.push(`Edge ${e.id||i+1} has weight outside 0–1.`);});
+            return {valid:errors.length===0,errors};
+        };
+        const parseCsvRecords = text => {
+            const rows=[];let row=[],field='',quoted=false;
+            for(let i=0;i<text.length;i++){const ch=text[i];if(quoted){if(ch==='"'&&text[i+1]==='"'){field+='"';i++;}else if(ch==='"')quoted=false;else field+=ch;}else if(ch==='"'&&field==='')quoted=true;else if(ch===','){row.push(field);field='';}else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&text[i+1]==='\n')i++;row.push(field);rows.push(row);row=[];field='';}else field+=ch;}
+            if(quoted)throw Error('CSV contains an unterminated quoted field.');if(field.length||row.length){row.push(field);rows.push(row);}return rows.filter(r=>r.some(v=>v.trim()!==''));
+        };
+        const csvField = value => {const v=value==null?'':String(value);return /[",\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
+        const loadSavedGraph = () => {try{const rn=localStorage.getItem('nexus_ckg_nodes'),re=localStorage.getItem('nexus_ckg_edges');const nodes=rn?JSON.parse(rn):INITIAL_NODES,edges=re?JSON.parse(re):INITIAL_EDGES;const v=validateGraphData(nodes,edges);if(!v.valid)throw Error(v.errors.join(' '));return {nodes,edges};}catch(error){console.warn('Saved graph invalid; using seed data.',error);return {nodes:INITIAL_NODES,edges:INITIAL_EDGES};}};
+
         // --- MAIN APP COMPONENT ---
         const App = () => {
             const [activeModule, setActiveModule] = useState('explorer');
             const [highContrast, setHighContrast] = useState(false);
             
-            // Persistent Nodes & Edges via Local Storage
-            const [nodes, setNodes] = useState(() => {
-                const saved = localStorage.getItem('nexus_ckg_nodes');
-                return saved ? JSON.parse(saved) : INITIAL_NODES;
-            });
-            const [edges, setEdges] = useState(() => {
-                const saved = localStorage.getItem('nexus_ckg_edges');
-                return saved ? JSON.parse(saved) : INITIAL_EDGES;
-            });
+            const [initialGraph] = useState(() => loadSavedGraph());
+            const [nodes, setNodes] = useState(initialGraph.nodes);
+            const [edges, setEdges] = useState(initialGraph.edges);
 
             const [selectedNode, setSelectedNode] = useState(null);
             const [searchQuery, setSearchQuery] = useState('');
@@ -192,10 +204,11 @@
                 { id: 'security', name: 'Security / Role Policy', weight: 0.90, active: true, desc: 'Enforces data classification and clearance levels.' },
             ]);
 
-            // Save graph data to localStorage whenever modified
             useEffect(() => {
-                localStorage.setItem('nexus_ckg_nodes', JSON.stringify(nodes));
-                localStorage.setItem('nexus_ckg_edges', JSON.stringify(edges));
+                const validation = validateGraphData(nodes, edges);
+                if (!validation.valid) { console.error('Blocked invalid graph persistence:', validation.errors); return; }
+                try { localStorage.setItem('nexus_ckg_nodes', JSON.stringify(nodes)); localStorage.setItem('nexus_ckg_edges', JSON.stringify(edges)); }
+                catch (error) { console.error('Unable to persist graph:', error); showToast('Graph could not be saved locally.'); }
             }, [nodes, edges]);
 
             // Save config updates to local storage
@@ -245,18 +258,21 @@
                 showToast(`Node "${newNode.label}" added & persisted.`);
             };
 
-            const handleBulkIngest = (newNodes, newEdges) => {
-                setNodes(prev => {
-                    const existingIds = new Set(prev.map(n => n.id));
-                    const filteredNew = newNodes.filter(n => !existingIds.has(n.id));
-                    return [...prev, ...filteredNew];
-                });
-                setEdges(prev => {
-                    const existingIds = new Set(prev.map(e => e.id));
-                    const filteredNew = newEdges.filter(e => !existingIds.has(e.id));
-                    return [...prev, ...filteredNew];
-                });
-                showToast(`Ingested & persisted ${newNodes.length} nodes and ${newEdges.length} edges.`);
+            const handleBulkIngest = (newNodes, newEdges, mode = 'merge') => {
+                const candidateNodes = mode === 'replace' ? newNodes : [...nodes, ...newNodes];
+                const candidateEdges = mode === 'replace' ? newEdges : [...edges, ...newEdges];
+                const validation = validateGraphData(candidateNodes, candidateEdges);
+                if (!validation.valid) {
+                    showToast(`Import rejected: ${validation.errors.slice(0, 2).join(' ')}`);
+                    return false;
+                }
+                setNodes(candidateNodes);
+                setEdges(candidateEdges);
+                setSelectedNode(null);
+                showToast(mode === 'replace'
+                    ? `Replaced graph with ${newNodes.length} nodes and ${newEdges.length} edges.`
+                    : `Imported ${newNodes.length} nodes and ${newEdges.length} edges.`);
+                return true;
             };
 
             return (
@@ -334,6 +350,8 @@
                     {/* Data Ingestion Modal */}
                     {isIngestModalOpen && (
                         <IngestionModal 
+                            existingNodes={nodes}
+                            existingEdges={edges}
                             onClose={() => setIsIngestModalOpen(false)}
                             onIngest={handleBulkIngest}
                         />
@@ -1654,9 +1672,10 @@
         };
 
         // --- INGESTION MODAL COMPONENT ---
-        const IngestionModal = ({ onClose, onIngest }) => {
+        const IngestionModal = ({ onClose, onIngest, existingNodes = [], existingEdges = [] }) => {
             const [graphCategory, setGraphCategory] = useState('ckg'); // 'ckg', 'context', 'entity'
             const [format, setFormat] = useState('json'); // 'json', 'csv', 'cypher'
+            const [importMode, setImportMode] = useState('merge'); // 'merge' or 'replace'
             const [inputText, setInputText] = useState('');
             const [parsedPreview, setParsedPreview] = useState({ nodes: [], edges: [], error: null });
 
@@ -1703,85 +1722,89 @@
                         const colorMap = { ckg: '#38bdf8', entity: '#10b981', context: '#6366f1', temporal: '#a855f7', spatial: '#f59e0b', topical: '#ec4899' };
 
                         newNodes = rawNodes.map((n, i) => ({
-                            id: n.id || `node_imp_${Date.now()}_${i}`,
-                            label: n.label || 'Imported Node',
-                            type: n.type || (graphCategory === 'context' ? 'temporal' : graphCategory),
-                            color: colorMap[n.type] || colorMap[graphCategory] || '#38bdf8',
-                            val: 16,
-                            desc: n.desc || `Imported under ${graphCategory.toUpperCase()} graph schema.`,
-                            metrics: { source: `${graphCategory.toUpperCase()} JSON-LD`, status: 'Ingested' }
+                            ...n,
+                            id: n.id ?? `node_imp_${Date.now()}_${i}`,
+                            label: n.label ?? 'Imported Node',
+                            type: n.type ?? (graphCategory === 'context' ? 'temporal' : graphCategory),
+                            color: n.color || colorMap[n.type] || colorMap[graphCategory] || '#38bdf8',
+                            val: n.val ?? 16,
+                            desc: n.desc ?? `Imported under ${graphCategory.toUpperCase()} graph schema.`,
+                            metrics: n.metrics ?? { source: `${graphCategory.toUpperCase()} JSON-LD`, status: 'Ingested' }
                         }));
 
                         newEdges = rawEdges.map((e, i) => ({
-                            id: e.id || `edge_imp_${Date.now()}_${i}`,
+                            ...e,
+                            id: e.id ?? `edge_imp_${Date.now()}_${i}`,
                             source: e.source,
                             target: e.target,
-                            label: e.label || 'linked_to',
-                            weight: e.weight || 0.8
+                            label: e.label ?? 'linked_to',
+                            weight: e.weight ?? 0.8
                         }));
+
                     } else if (format === 'csv') {
-                        const parts = inputText.split('---edges---');
-                        const nodeLines = parts[0].trim().split('\n').slice(1); // skip header
-                        const edgeLines = parts[1] ? parts[1].trim().split('\n').slice(1) : [];
-
-                        const colorMap = { ckg: '#38bdf8', entity: '#10b981', context: '#6366f1', temporal: '#a855f7', spatial: '#f59e0b', topical: '#ec4899' };
-
-                        newNodes = nodeLines.map((line, i) => {
-                            const [id, label, type, desc] = line.split(',');
-                            const nodeType = type || (graphCategory === 'context' ? 'temporal' : graphCategory);
-                            return {
-                                id: id?.trim() || `csv_n_${i}`,
-                                label: label?.trim() || `CSV Node ${i}`,
-                                type: nodeType,
-                                color: colorMap[nodeType] || colorMap[graphCategory] || '#38bdf8',
-                                val: 16,
-                                desc: desc?.trim() || 'CSV Table Ingestion',
-                                metrics: { source: 'CSV Table' }
-                            };
-                        });
-
-                        newEdges = edgeLines.map((line, i) => {
-                            const [source, target, label, weight] = line.split(',');
-                            return {
-                                id: `csv_e_${i}`,
-                                source: source?.trim(),
-                                target: target?.trim(),
-                                label: label?.trim() || 'relates',
-                                weight: parseFloat(weight) || 0.8
-                            };
-                        });
+                        const marker=/(?:^|\r?\n)---edges---(?:\r?\n|$)/,match=marker.exec(inputText);
+                        if(!match)throw Error('CSV must contain a ---edges--- separator between nodes and edges.');
+                        const nr=parseCsvRecords(inputText.slice(0,match.index).trim()),er=parseCsvRecords(inputText.slice(match.index+match[0].length).trim());
+                        const nh=(nr.shift()||[]).map(v=>v.trim().toLowerCase()),eh=(er.shift()||[]).map(v=>v.trim().toLowerCase());
+                        if(!['id','label','type'].every(k=>nh.includes(k)))throw Error('Node CSV header must include id,label,type.');
+                        if(!['source','target','label','weight'].every(k=>eh.includes(k)))throw Error('Edge CSV header must include source,target,label,weight.');
+                        const ni=Object.fromEntries(nh.map((v,i)=>[v,i])),ei=Object.fromEntries(eh.map((v,i)=>[v,i]));
+                        const colorMap={ckg:'#38bdf8',entity:'#10b981',context:'#6366f1',temporal:'#a855f7',spatial:'#f59e0b',topical:'#ec4899'};
+                        newNodes=nr.map((row,i)=>{const type=row[ni.type]||(graphCategory==='context'?'temporal':graphCategory);let metrics={source:'CSV Table'};if(ni.metrics_json!==undefined&&row[ni.metrics_json]){try{metrics=JSON.parse(row[ni.metrics_json]);}catch{throw Error(`Node CSV row ${i+2} has invalid metrics_json.`);}}return {id:row[ni.id]?.trim(),label:row[ni.label]?.trim(),type,color:row[ni.color]||colorMap[type]||colorMap[graphCategory]||'#38bdf8',val:ni.val!==undefined&&row[ni.val]!==''?Number(row[ni.val]):16,desc:ni.desc!==undefined?row[ni.desc]:'CSV Table Ingestion',metrics};});
+                        newEdges=er.map((row,i)=>({id:ei.id!==undefined&&row[ei.id]?.trim()?row[ei.id].trim():`csv_e_${i}`,source:row[ei.source]?.trim(),target:row[ei.target]?.trim(),label:row[ei.label]?.trim()||'relates',weight:row[ei.weight]===''||row[ei.weight]===undefined?0.8:Number(row[ei.weight])}));
                     } else if (format === 'cypher') {
-                        // Regex match simple Cypher CREATE patterns
-                        const nodeMatches = [...inputText.matchAll(/CREATE\s*\(([^:]+):?([^\s{]*)\s*\{([^}]+)\}\)/gi)];
+                        // Supported subset: CREATE nodes with property maps and directed relationships.
+                        const nodeMatches = [...inputText.matchAll(/CREATE\s*\(([^:]*):?([^\s{]*)\s*\{([^}]+)\}\)/gi)];
                         const colorMap = { ckg: '#38bdf8', entity: '#10b981', context: '#6366f1', temporal: '#a855f7', spatial: '#f59e0b', topical: '#ec4899' };
-
+                        const variableToId = new Map();
+                        const quotedPatterns = {
+                            id: /id:\s*['"]([^'"]*)['"]/i,
+                            label: /label:\s*['"]([^'"]*)['"]/i,
+                            desc: /desc:\s*['"]([^'"]*)['"]/i,
+                            type: /type:\s*['"]([^'"]*)['"]/i,
+                            color: /color:\s*['"]([^'"]*)['"]/i
+                        };
+                        const quotedProperty = (props, name) => {
+                            const found = (quotedPatterns[name] || /$a/).exec(props);
+                            return found ? found[1] : null;
+                        };
                         newNodes = nodeMatches.map((m, i) => {
-                            const propsStr = m[3];
-                            const idMatch = propsStr.match(/id:\s*['"]([^'"]+)['"]/);
-                            const labelMatch = propsStr.match(/label:\s*['"]([^'"]+)['"]/);
-                            const descMatch = propsStr.match(/desc:\s*['"]([^'"]+)['"]/);
-
-                            const nodeType = graphCategory === 'context' ? 'temporal' : graphCategory;
+                            const props = m[3];
+                            const id = quotedProperty(props, 'id') || ('cypher_n_' + i);
+                            const variable = m[1].trim();
+                            if (variable) variableToId.set(variable, id);
+                            const label = quotedProperty(props, 'label') || 'Cypher Node';
+                            const desc = quotedProperty(props, 'desc') || 'Cypher Query Extraction';
+                            const declaredType = quotedProperty(props, 'type');
+                            const typeToken = (declaredType || m[2] || graphCategory).toLowerCase();
+                            const nodeType = ['ckg','entity','context','temporal','spatial','topical'].includes(typeToken)
+                                ? typeToken
+                                : (graphCategory === 'context' ? 'temporal' : graphCategory);
+                            const valMatch = /val:\s*(-?\d+(?:\.\d+)?)/i.exec(props);
+                            const colorMatch = quotedProperty(props, 'color');
                             return {
-                                id: idMatch ? idMatch[1] : `cypher_n_${i}`,
-                                label: labelMatch ? labelMatch[1] : 'Cypher Node',
-                                type: nodeType,
-                                color: colorMap[nodeType] || '#38bdf8',
-                                val: 16,
-                                desc: descMatch ? descMatch[1] : 'Cypher Query Extraction',
-                                metrics: { source: 'Cypher Query' }
+                                id: id, label: label, type: nodeType,
+                                color: colorMatch || colorMap[nodeType] || '#38bdf8',
+                                val: valMatch ? Number(valMatch[1]) : 16,
+                                desc: desc, metrics: { source: 'Cypher Query' }
                             };
                         });
-
-                        // Regex match simple Cypher relationships
+                        const aliasToId = new Map();
+                        for (const match of inputText.matchAll(/\((\w+)\s*\{\s*id:\s*['"]([^'"]+)['"]\s*\}\)/gi)) {
+                            aliasToId.set(match[1], match[2]);
+                        }
                         const edgeMatches = [...inputText.matchAll(/\(([^)]+)\)-\[:([^\]\s]+)\s*\{?([^}]*)\}?\]->\(([^)]+)\)/gi)];
-                        newEdges = edgeMatches.map((m, i) => ({
-                            id: `cypher_e_${i}`,
-                            source: m[1].trim(),
-                            target: m[4].trim(),
-                            label: m[2].trim(),
-                            weight: 0.85
-                        }));
+                        newEdges = edgeMatches.map((m, i) => {
+                            const rawSource = m[1].trim(), rawTarget = m[4].trim();
+                            return {
+                                id: 'cypher_e_' + i,
+                                source: aliasToId.get(rawSource) || variableToId.get(rawSource) || rawSource,
+                                target: aliasToId.get(rawTarget) || variableToId.get(rawTarget) || rawTarget,
+                                label: m[2].trim(),
+                                weight: ((/weight:\s*(-?\d+(?:\.\d+)?)/i).exec(m[3]) || [])[1] !== undefined
+                                    ? Number((/weight:\s*(-?\d+(?:\.\d+)?)/i).exec(m[3])[1]) : 0.85
+                            };
+                        });
                     }
 
                     setParsedPreview({ nodes: newNodes, edges: newEdges, error: null });
@@ -1800,8 +1823,15 @@
 
             const confirmIngestion = () => {
                 if (parsedPreview.error || parsedPreview.nodes.length === 0) return;
-                onIngest(parsedPreview.nodes, parsedPreview.edges);
-                onClose();
+                const candidateNodes = importMode === 'replace' ? parsedPreview.nodes : [...existingNodes, ...parsedPreview.nodes];
+                const candidateEdges = importMode === 'replace' ? parsedPreview.edges : [...existingEdges, ...parsedPreview.edges];
+                const validation = validateGraphData(candidateNodes, candidateEdges);
+                if (!validation.valid) {
+                    setParsedPreview(prev => ({ ...prev, error: validation.errors.slice(0, 4).join(' ') }));
+                    return;
+                }
+                const accepted = onIngest(parsedPreview.nodes, parsedPreview.edges, importMode);
+                if (accepted !== false) onClose();
             };
 
             return (
@@ -1923,6 +1953,15 @@
                             )}
                         </div>
 
+                        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-800 bg-slate-900/60 p-3">
+                            <label htmlFor="graph-import-mode" className="text-xs font-semibold text-slate-300">Import behavior</label>
+                            <select id="graph-import-mode" value={importMode} onChange={e => setImportMode(e.target.value)} className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200">
+                                <option value="merge">Merge into current graph</option>
+                                <option value="replace">Replace current graph</option>
+                            </select>
+                            {importMode === 'replace' && <span className="text-xs text-amber-300">Replaces the current graph only after the entire imported graph validates.</span>}
+                        </div>
+
                         {/* Actions */}
                         <div className="flex gap-2">
                             <button 
@@ -1974,24 +2013,19 @@
                         targetType: exportScope,
                         exportedAt: new Date().toISOString(),
                         nodes: targetNodes.map(n => {
-                            const nodeObj = { id: n.id, label: n.label, type: n.type, desc: n.desc };
-                            if (incMetadata) nodeObj.metrics = n.metrics;
-                            if (incEmbeddings) nodeObj.vectorDimensions = 1536;
+                            const nodeObj = { ...n };
+                            if (!incMetadata) delete nodeObj.metrics;
+                            if (!incEmbeddings) delete nodeObj.vectorDimensions;
                             return nodeObj;
                         }),
                         edges: targetEdges
                     };
                     return JSON.stringify(payload, null, 2);
                 } else if (exportFormat === 'csv') {
-                    let csv = `id,label,type,desc\n`;
-                    targetNodes.forEach(n => {
-                        csv += `"${n.id}","${n.label}","${n.type}","${n.desc}"\n`;
-                    });
-                    csv += `\n---edges---\nsource,target,label,weight\n`;
-                    targetEdges.forEach(e => {
-                        csv += `"${e.source}","${e.target}","${e.label}",${e.weight}\n`;
-                    });
-                    return csv;
+                    const nf=['id','label','type','val','color','desc','metrics_json'],ef=['id','source','target','label','weight'];
+                    const nc=[nf.map(csvField).join(','),...targetNodes.map(n=>nf.map(k=>csvField(k==='metrics_json'?JSON.stringify(n.metrics||{}):n[k])).join(','))].join('\n');
+                    const ec=[ef.map(csvField).join(','),...targetEdges.map(e=>ef.map(k=>csvField(e[k])).join(','))].join('\n');
+                    return nc+'\n---edges---\n'+ec+'\n';
                 } else if (exportFormat === 'cypher') {
                     let cypher = `// Nexus CKG Export Script - Target: ${exportScope.toUpperCase()}\n`;
                     targetNodes.forEach(n => {

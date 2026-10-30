@@ -1,0 +1,434 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/nexus-reference-corpus.schema.json",
+  "title": "Nexus Reference and Evidence Corpus records",
+  "description": "Record-shape definitions for the file-based reference/evidence prototype. All example data in the repository is synthetic.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/source"
+    },
+    {
+      "$ref": "#/$defs/agent"
+    },
+    {
+      "$ref": "#/$defs/attribution"
+    },
+    {
+      "$ref": "#/$defs/claim"
+    },
+    {
+      "$ref": "#/$defs/evidenceLink"
+    }
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1
+    },
+    "graphTarget": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "nodeId"
+          ],
+          "properties": {
+            "kind": {
+              "const": "node"
+            },
+            "nodeId": {
+              "$ref": "#/$defs/identifier"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "edgeId"
+          ],
+          "properties": {
+            "kind": {
+              "const": "edge"
+            },
+            "edgeId": {
+              "$ref": "#/$defs/identifier"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "sourceNodeId",
+            "edgeId",
+            "targetNodeId"
+          ],
+          "properties": {
+            "kind": {
+              "const": "path"
+            },
+            "sourceNodeId": {
+              "$ref": "#/$defs/identifier"
+            },
+            "edgeId": {
+              "$ref": "#/$defs/identifier"
+            },
+            "targetNodeId": {
+              "$ref": "#/$defs/identifier"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "kind",
+            "claimId"
+          ],
+          "properties": {
+            "kind": {
+              "const": "claim"
+            },
+            "claimId": {
+              "$ref": "#/$defs/identifier"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "sourceId",
+        "workId",
+        "kind",
+        "title",
+        "synthetic"
+      ],
+      "properties": {
+        "sourceId": {
+          "$ref": "#/$defs/identifier"
+        },
+        "workId": {
+          "$ref": "#/$defs/identifier"
+        },
+        "kind": {
+          "enum": [
+            "webpage",
+            "article",
+            "book",
+            "report",
+            "dataset",
+            "legal_instrument",
+            "archive_item",
+            "repository_artifact",
+            "other"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "canonicalUrl": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        },
+        "identifiers": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "language": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "publicationDate": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "accessedAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "contentHash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "contentHashAlgorithm": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "accessStatus": {
+          "type": "string"
+        },
+        "synthetic": {
+          "type": "boolean"
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "agent": {
+      "type": "object",
+      "required": [
+        "agentId",
+        "kind",
+        "displayName",
+        "synthetic"
+      ],
+      "properties": {
+        "agentId": {
+          "$ref": "#/$defs/identifier"
+        },
+        "kind": {
+          "enum": [
+            "person",
+            "organization",
+            "collective",
+            "unknown"
+          ]
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "nameParts": {
+          "type": "object"
+        },
+        "identifiers": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "synthetic": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": true
+    },
+    "attribution": {
+      "type": "object",
+      "required": [
+        "attributionId",
+        "agentId",
+        "workId",
+        "role",
+        "basis",
+        "synthetic"
+      ],
+      "properties": {
+        "attributionId": {
+          "$ref": "#/$defs/identifier"
+        },
+        "agentId": {
+          "$ref": "#/$defs/identifier"
+        },
+        "workId": {
+          "$ref": "#/$defs/identifier"
+        },
+        "role": {
+          "enum": [
+            "author",
+            "co_author",
+            "editor",
+            "translator",
+            "publisher",
+            "issuing_body",
+            "host",
+            "archivist",
+            "photographer",
+            "illustrator",
+            "contributor",
+            "unknown"
+          ]
+        },
+        "basis": {
+          "type": "string"
+        },
+        "confidence": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "synthetic": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": true
+    },
+    "claim": {
+      "type": "object",
+      "required": [
+        "claimId",
+        "statement",
+        "subject",
+        "predicate",
+        "object",
+        "status",
+        "synthetic"
+      ],
+      "properties": {
+        "claimId": {
+          "$ref": "#/$defs/identifier"
+        },
+        "statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subject": {
+          "type": "object"
+        },
+        "predicate": {
+          "type": "string",
+          "minLength": 1
+        },
+        "object": {
+          "type": "object"
+        },
+        "target": {
+          "$ref": "#/$defs/graphTarget"
+        },
+        "qualifiers": {
+          "type": "object"
+        },
+        "status": {
+          "enum": [
+            "proposed",
+            "supported",
+            "disputed",
+            "superseded",
+            "rejected"
+          ]
+        },
+        "assertedBy": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "createdAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "supersedes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        },
+        "synthetic": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": true
+    },
+    "evidenceLink": {
+      "type": "object",
+      "required": [
+        "evidenceLinkId",
+        "sourceId",
+        "stance",
+        "relationType",
+        "synthetic"
+      ],
+      "properties": {
+        "evidenceLinkId": {
+          "$ref": "#/$defs/identifier"
+        },
+        "sourceId": {
+          "$ref": "#/$defs/identifier"
+        },
+        "claimId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "target": {
+          "$ref": "#/$defs/graphTarget"
+        },
+        "stance": {
+          "enum": [
+            "supports",
+            "contradicts",
+            "mentions",
+            "contextualizes",
+            "derives_from",
+            "does_not_address",
+            "unclear"
+          ]
+        },
+        "relationType": {
+          "type": "string",
+          "minLength": 1
+        },
+        "locator": {
+          "type": "object"
+        },
+        "excerpt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "extraction": {
+          "type": "object"
+        },
+        "verification": {
+          "type": "object"
+        },
+        "confidence": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "synthetic": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

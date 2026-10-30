@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/claim-evidence-submission.schema.json",
+  "title": "Nexus claim and evidence submission",
+  "type": "object",
+  "required": ["schema", "operation", "claim", "evidence"],
+  "properties": {
+    "schema": { "const": "nexus-claim-evidence-submission/v1" },
+    "operation": { "enum": ["create_candidate", "upsert_candidate", "propose_supersession"] },
+    "claim": { "type": "object", "required": ["claimId", "statement"], "properties": {
+      "claimId": { "type": "string", "minLength": 1 },
+      "statement": { "type": "string", "minLength": 1 },
+      "targetRef": { "$ref": "#/$defs/reference" },
+      "status": { "enum": ["proposed", "active", "review_required", "disputed", "superseded", "rejected", "archived"] }
+    }, "additionalProperties": true },
+    "evidence": { "type": "object", "required": ["evidenceId", "sourceRef", "stance"], "properties": {
+      "evidenceId": { "type": "string", "minLength": 1 },
+      "sourceRef": { "type": "string", "minLength": 1 },
+      "stance": { "enum": ["supports", "contradicts", "contextualizes", "mentions", "neutral", "unclear"] },
+      "locator": { "type": ["string", "null"] },
+      "extractionConfidence": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+      "quotedText": { "type": ["string", "null"] }
+    }, "additionalProperties": true }
+  },
+  "additionalProperties": false,
+  "$defs": { "reference": { "type": "object", "required": ["refType", "refId"], "properties": {
+    "refType": { "enum": ["graph_node", "graph_edge", "source", "claim", "evidence_link", "artifact"] },
+    "refId": { "type": "string", "minLength": 1 }
+  }, "additionalProperties": false } }
+}

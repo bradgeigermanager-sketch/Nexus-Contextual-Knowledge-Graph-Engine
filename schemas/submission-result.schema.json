@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/submission-result.schema.json",
+  "title": "Nexus staged submission result",
+  "type": "object",
+  "required": ["submissionId", "status", "validation", "effects"],
+  "properties": {
+    "submissionId": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["received", "invalid", "staged", "needs_review", "committed", "rejected", "duplicate"] },
+    "validation": { "$ref": "validation-report.schema.json" },
+    "canonicalRefs": { "type": "array", "items": { "type": "object", "required": ["refType", "refId"], "properties": {
+      "refType": { "type": "string", "minLength": 1 },
+      "refId": { "type": "string", "minLength": 1 }
+    }, "additionalProperties": false } },
+    "effects": { "type": "object", "required": ["committed"], "properties": {
+      "committed": { "type": "boolean" },
+      "created": { "type": "integer", "minimum": 0 },
+      "updated": { "type": "integer", "minimum": 0 },
+      "superseded": { "type": "integer", "minimum": 0 }
+    }, "additionalProperties": false },
+    "idempotencyKey": { "type": ["string", "null"] }
+  },
+  "additionalProperties": false
+}

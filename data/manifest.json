@@ -1,0 +1,40 @@
+{
+  "schema": "nexus-ckg-archive-manifest/v1",
+  "dataset": "initial-application-seed-graph",
+  "status": "fixtures-added-import-hardening-pending",
+  "source": "INITIAL_NODES and INITIAL_EDGES in index.html",
+  "synthetic": true,
+  "counts": {
+    "nodes": 8,
+    "edges": 8
+  },
+  "formats": {
+    "json": {
+      "path": "import-fixtures/graph.json",
+      "uiImportSupported": true,
+      "knownLimitations": [
+        "Importer remaps some fields and adds defaults; canonical graph retains original fields."
+      ]
+    },
+    "csv": {
+      "path": "import-fixtures/graph.csv",
+      "uiImportSupported": true,
+      "knownLimitations": [
+        "CSV quoted-field parser/exporter and preservation of node metrics/edge IDs have been implemented with regression tests; successful CI and full browser validation remain unconfirmed."
+      ]
+    },
+    "cypher": {
+      "path": "import-fixtures/graph.cypher",
+      "uiImportSupported": true,
+      "knownLimitations": [
+        "Importer supports only a narrow regex-parsed Cypher subset; complex expressions, escaped string values, and arbitrary properties are not fully supported. Basic relationship endpoint alias resolution and numeric weight preservation are implemented, but full-fidelity round trips are not yet guaranteed."
+      ]
+    },
+    "svg": {
+      "uiImportSupported": false,
+      "uiExportSupported": true,
+      "note": "Export-only in the current application UI; not an import fixture."
+    }
+  },
+  "factualValidity": "Structural validity does not establish factual accuracy."
+}

@@ -1,0 +1,160 @@
+{
+  "schema": "nexus-ckg-graph/v1",
+  "dataset": "initial-application-seed-graph",
+  "description": "Repository snapshot of the application's original synthetic seed graph. Descriptive claims are sample data, not verified factual assertions.",
+  "nodes": [
+    {
+      "id": "n1",
+      "label": "User Query",
+      "type": "entity",
+      "val": 20,
+      "color": "#10b981",
+      "desc": "Active user query payload seeking quarterly performance analysis",
+      "metrics": {
+        "latency": "12ms",
+        "weight": 0.95
+      }
+    },
+    {
+      "id": "n2",
+      "label": "Financial Report",
+      "type": "ckg",
+      "val": 26,
+      "color": "#38bdf8",
+      "desc": "Core Contextual Knowledge Graph entity representing SEC 10-Q filings",
+      "metrics": {
+        "confidence": "98%",
+        "vectorDim": 1536
+      }
+    },
+    {
+      "id": "n3",
+      "label": "Q3 2026",
+      "type": "temporal",
+      "val": 18,
+      "color": "#a855f7",
+      "desc": "Temporal constraint filter set to current fiscal quarter",
+      "metrics": {
+        "timeframe": "Q3-2026",
+        "scope": "Exact"
+      }
+    },
+    {
+      "id": "n4",
+      "label": "North America",
+      "type": "spatial",
+      "val": 18,
+      "color": "#f59e0b",
+      "desc": "Geographic entity bound to regional operational centers",
+      "metrics": {
+        "lat": 37.77,
+        "lon": -122.41
+      }
+    },
+    {
+      "id": "n5",
+      "label": "Revenue Growth",
+      "type": "topical",
+      "val": 22,
+      "color": "#ec4899",
+      "desc": "Topical domain topic vector for fiscal expansion and margins",
+      "metrics": {
+        "relevance": 0.92,
+        "status": "Active"
+      }
+    },
+    {
+      "id": "n6",
+      "label": "AI Market Trend",
+      "type": "ckg",
+      "val": 20,
+      "color": "#38bdf8",
+      "desc": "Macroeconomic market trends generated from LLM extractions",
+      "metrics": {
+        "cluster": "Technology/AI",
+        "density": 0.84
+      }
+    },
+    {
+      "id": "n7",
+      "label": "Regulatory Policy",
+      "type": "context",
+      "val": 18,
+      "color": "#6366f1",
+      "desc": "Compliance & Governance restriction layers",
+      "metrics": {
+        "complianceLevel": "Tier-1 High Risk"
+      }
+    },
+    {
+      "id": "n8",
+      "label": "Executive Briefing",
+      "type": "entity",
+      "val": 16,
+      "color": "#10b981",
+      "desc": "Generated synthesis document target for RAG retrieval",
+      "metrics": {
+        "status": "Drafting",
+        "topK": 5
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "n1",
+      "target": "n2",
+      "label": "references",
+      "weight": 0.9
+    },
+    {
+      "id": "e2",
+      "source": "n2",
+      "target": "n3",
+      "label": "temporal_scope",
+      "weight": 0.8
+    },
+    {
+      "id": "e3",
+      "source": "n2",
+      "target": "n4",
+      "label": "spatial_bound",
+      "weight": 0.85
+    },
+    {
+      "id": "e4",
+      "source": "n2",
+      "target": "n5",
+      "label": "has_topic",
+      "weight": 0.95
+    },
+    {
+      "id": "e5",
+      "source": "n5",
+      "target": "n6",
+      "label": "correlated_with",
+      "weight": 0.75
+    },
+    {
+      "id": "e6",
+      "source": "n1",
+      "target": "n7",
+      "label": "constrained_by",
+      "weight": 0.88
+    },
+    {
+      "id": "e7",
+      "source": "n6",
+      "target": "n4",
+      "label": "regional_impact",
+      "weight": 0.7
+    },
+    {
+      "id": "e8",
+      "source": "n2",
+      "target": "n8",
+      "label": "synthesizes_into",
+      "weight": 0.92
+    }
+  ]
+}

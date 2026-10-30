@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/web-endpoint.schema.json",
+  "title": "Nexus web endpoint profile",
+  "type": "object",
+  "required": ["endpointId", "version", "label", "purpose", "baseUrl", "allowedHosts", "allowedMethods", "requestFormat", "responseFormat", "enabled", "security", "limits"],
+  "properties": {
+    "endpointId": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+    "version": { "type": "string", "minLength": 1 },
+    "label": { "type": "string", "minLength": 1 },
+    "purpose": { "type": "string", "minLength": 1 },
+    "baseUrl": { "type": "string", "format": "uri" },
+    "allowedHosts": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "allowedMethods": { "type": "array", "minItems": 1, "items": { "enum": ["GET", "POST", "HEAD"] }, "uniqueItems": true },
+    "requestFormat": { "enum": ["none", "json", "sparql-query"] },
+    "responseFormat": { "enum": ["json", "text", "sparql-json"] },
+    "enabled": { "type": "boolean" },
+    "auth": { "type": "object", "properties": {
+      "type": { "enum": ["none", "bearer_env", "header_env"] },
+      "secretRef": { "type": ["string", "null"] },
+      "headerName": { "type": ["string", "null"] }
+    }, "additionalProperties": false },
+    "security": { "type": "object", "required": ["requireHttps", "allowRedirects", "allowPrivateNetwork"], "properties": {
+      "requireHttps": { "type": "boolean", "const": true },
+      "allowRedirects": { "type": "boolean", "const": false },
+      "allowPrivateNetwork": { "type": "boolean", "const": false }
+    }, "additionalProperties": false },
+    "limits": { "type": "object", "required": ["timeoutMs", "maxResponseBytes"], "properties": {
+      "timeoutMs": { "type": "integer", "minimum": 100, "maximum": 30000 },
+      "maxResponseBytes": { "type": "integer", "minimum": 1, "maximum": 5000000 }
+    }, "additionalProperties": false },
+    "defaultHeaders": { "type": "object", "additionalProperties": { "type": "string" } },
+    "tags": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+  },
+  "additionalProperties": false
+}
